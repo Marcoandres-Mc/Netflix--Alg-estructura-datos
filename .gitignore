@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.vcxproj.user
+*.VC.db
+*.opendb
+
+# Compilados
+Debug/
+Release/
+x64/
+x86/
+
+# Otros
+*.exe
+*.obj
+*.log
