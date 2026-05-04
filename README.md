@@ -15,7 +15,7 @@
 
 <br><strong>_Informe de Trabajo Parcial_</strong><br><br>
 
-<strong>Nombre del startup: Movildev</strong><br>
+<strong>Nombre del startup: </strong><br>
 <strong>Netflix</strong><br>
 
 ### Relación de Integrantes
