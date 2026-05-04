@@ -4,13 +4,19 @@
 *.VC.db
 *.opendb
 
-# Compilados
+# Compilados C++
 Debug/
 Release/
 x64/
 x86/
 
+# .NET / CLR
+bin/
+obj/
+
 # Otros
 *.exe
 *.obj
 *.log
+*.user
+*.suo
