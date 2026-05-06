@@ -124,7 +124,7 @@ private:
         if (op == 2) calificarSerie(id);
     }
 
-    void verTemporadas(int idSerie) {
+    void verTemporadas(int idSerie) {   
         cout << "\n--- Temporadas ---\n";
         cout << "T1 (2016) - 8 episodios\n";
         cout << "T2 (2017) - 9 episodios\n";
