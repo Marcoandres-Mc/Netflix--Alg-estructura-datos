@@ -1,5 +1,6 @@
 #pragma once
-#include <stdexcept>
+#include <iostream>
+using namespace std;
 
 template<class T>
 struct Nodo {
@@ -97,7 +98,7 @@ public:
     }
 
     void pop() {
-        if (estaVacia()) throw std::underflow_error("Pila vacia");
+        if (estaVacia()) { cout << "Error: Pila vacia\n"; return; }
         Nodo<T>* temp = tope_;
         tope_ = tope_->next;
         delete temp;
@@ -105,7 +106,7 @@ public:
     }
 
     T& tope() const {
-        if (estaVacia()) throw std::underflow_error("Pila vacia");
+        if (estaVacia()) cout << "Error: Pila vacia\n";
         return tope_->dato;
     }
 
@@ -138,7 +139,7 @@ public:
     }
 
     void desencolar() {
-        if (estaVacia()) throw std::underflow_error("Cola vacia");
+        if (estaVacia()) { cout << "Error: Cola vacia\n"; return; }
         Nodo<T>* temp = frente_;
         frente_ = frente_->next;
         if (!frente_) final_ = nullptr;
@@ -147,7 +148,7 @@ public:
     }
 
     T& frente() const {
-        if (estaVacia()) throw std::underflow_error("Cola vacia");
+        if (estaVacia()) cout << "Error: Cola vacia\n";
         return frente_->dato;
     }
 
