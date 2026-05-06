@@ -1,0 +1,6 @@
+id|titulo|genero|descripcion
+1|Stranger Things|Ciencia Ficcion|Un grupo de ninos enfrenta fuerzas sobrenaturales en Hawkins Indiana
+2|Breaking Bad|Drama|Un profesor de quimica se convierte en fabricante de drogas tras ser diagnosticado con cancer
+3|The Crown|Historia|La vida de la familia real britanica desde la posguerra hasta la era moderna
+4|Dark|Ciencia Ficcion|Cuatro familias alemanas quedan atrapadas en un misterioso bucle temporal
+5|Squid Game|Thriller|Personas endeudadas compiten en juegos infantiles mortales por un gran premio

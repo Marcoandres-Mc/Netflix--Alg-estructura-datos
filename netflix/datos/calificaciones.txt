@@ -1,0 +1,8 @@
+id_serie|puntaje|comentario|usuario
+1|5|Excelente serie muy entretenida|carlos_user
+1|4|Muy buena pero lenta al inicio|ana_user
+2|5|La mejor serie de drama que he visto|pedro_user
+2|5|Obra maestra absolutamente recomendada|carlos_user
+3|3|Interesante pero muy lenta|ana_user
+4|5|Increible historia y muy bien producida|carlos_user
+5|4|Muy intensa y con buen mensaje social|pedro_user
