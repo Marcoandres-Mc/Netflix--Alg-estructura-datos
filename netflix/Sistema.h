@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <fstrema>
+#include <fstream>
 #include "Estructuras.h"
 #include "Entidades.h"
 using namespace std;

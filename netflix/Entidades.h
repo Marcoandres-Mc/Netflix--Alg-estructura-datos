@@ -7,13 +7,13 @@ class Perfil
 {
 public:
     Perfil(int_id, string_nom, bool_infantil)
-    : id(_id), nombre(_nom), esInfantil(_infantil){
-    miListaPersonal=new MiLista();
+        : id(_id), nombre(_nom), esInfantil(_infantil) {
+        miListaPersonal = new MiLista();
     }
-    ~Perfil(){delete miListaPersonal; }
+    ~Perfil() { delete miListaPersonal; }
 
-    string getNombre() const{return nombre; }
-    MiLista*getLista() {return miListaPersonal; }
+    string getNombre() const { return nombre; }
+    MiLista* getLista() { return miListaPersonal; }
 
     bool buscarEnListaRecursivo(int index, string tituloBuscado);
 
@@ -22,7 +22,8 @@ private:
     string nombre;
     bool esInfantil;
     MiLista* miListaPersonal;
-    };
+};
+
 
 class Usuario
 {
@@ -256,4 +257,182 @@ private:
     string          descripcion;
     Lista<Temporada*>    temporadas;
     Lista<Calificacion*> calificaciones;
+};
+
+class Categoria
+{
+public:
+    Categoria(int id, string nombre, string descripcion)
+        : id(id), nombre(nombre), descripcion(descripcion) {
+    }
+
+    ~Categoria() {}
+
+    int getId() const { return id; }
+    string getNombre() const { return nombre; }
+    string getDescripcion() const { return descripcion; }
+
+    void mostrarCategoria() const {
+        cout << "Categoria: " << nombre << endl;
+        cout << "Descripcion: " << descripcion << endl;
+    }
+
+private:
+    int id;
+    string nombre;
+    string descripcion;
+};
+
+class Contenido
+{
+public:
+    Contenido(int id,
+        string titulo,
+        string genero,
+        int anio,
+        int duracion,
+        string clasificacionEdad,
+        Categoria* categoria)
+        : id(id),
+        titulo(titulo),
+        genero(genero),
+        anio(anio),
+        duracion(duracion),
+        clasificacionEdad(clasificacionEdad),
+        categoria(categoria) {
+    }
+
+    virtual ~Contenido() {}
+
+    int getId() const { return id; }
+    string getTitulo() const { return titulo; }
+    string getGenero() const { return genero; }
+    int getAnio() const { return anio; }
+
+    virtual void mostrarDetalle() const {
+        cout << "Titulo: " << titulo << endl;
+        cout << "Genero: " << genero << endl;
+        cout << "Anio: " << anio << endl;
+        cout << "Duracion: " << duracion << " min" << endl;
+        cout << "Clasificacion: " << clasificacionEdad << endl;
+
+        if (categoria != nullptr) {
+            cout << "Categoria: " << categoria->getNombre() << endl;
+        }
+    }
+
+    bool esAptaParaPerfil(bool esInfantil) const {
+        if (esInfantil && clasificacionEdad != "ATP") {
+            return false;
+        }
+        return true;
+    }
+
+protected:
+    int id;
+    string titulo;
+    string genero;
+    int anio;
+    int duracion;
+    string clasificacionEdad;
+
+    Categoria* categoria;
+};
+
+
+class Pelicula : public Contenido
+{
+public:
+    Pelicula(int id,
+        string titulo,
+        string genero,
+        int anio,
+        int duracion,
+        string clasificacionEdad,
+        Categoria* categoria,
+        string director,
+        string productora,
+        string idioma,
+        string paisOrigen)
+
+        : Contenido(id, titulo, genero, anio, duracion,
+            clasificacionEdad, categoria),
+
+        director(director),
+        productora(productora),
+        idioma(idioma),
+        paisOrigen(paisOrigen) {
+    }
+
+    ~Pelicula() {}
+
+    void mostrarDetalle() const override {
+        Contenido::mostrarDetalle();
+
+        cout << "Director: " << director << endl;
+        cout << "Productora: " << productora << endl;
+        cout << "Idioma: " << idioma << endl;
+        cout << "Pais de origen: " << paisOrigen << endl;
+    }
+
+    float calcularPopularidad() const {
+        return 95.5f;
+    }
+
+private:
+    string director;
+    string productora;
+    string idioma;
+    string paisOrigen;
+};
+
+
+class Recomendacion
+{
+public:
+    Recomendacion(int id,
+        string motivo,
+        float puntajeCoincidencia,
+        Contenido* contenido,
+        Perfil* perfil)
+
+        : id(id),
+        motivo(motivo),
+        puntajeCoincidencia(puntajeCoincidencia),
+        contenido(contenido),
+        perfil(perfil) {
+    }
+
+    ~Recomendacion() {}
+
+    string generarMotivo() const {
+        return motivo;
+    }
+
+    float calcularCoincidencia() const {
+        return puntajeCoincidencia;
+    }
+
+    bool esRelevante() const {
+        return puntajeCoincidencia >= 70;
+    }
+
+    void mostrarRecomendacion() const {
+        cout << "Contenido recomendado: "
+            << contenido->getTitulo() << endl;
+
+        cout << "Motivo: "
+            << motivo << endl;
+
+        cout << "Coincidencia: "
+            << puntajeCoincidencia << "%" << endl;
+    }
+
+private:
+    int id;
+    string motivo;
+    float puntajeCoincidencia;
+
+    Contenido* contenido;
+    Perfil* perfil;
 };
