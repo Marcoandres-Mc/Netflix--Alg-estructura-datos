@@ -7,7 +7,7 @@ class Perfil
 {
 public:
     Perfil(int_id, string_nom, bool_infantil)
-    : id(id), nombre(_nom), esInfantil(_infantil){
+    : id(_id), nombre(_nom), esInfantil(_infantil){
     miListaPersonal=new MiLista();
     }
     ~Perfil(){delete miListaPersonal; }
@@ -29,7 +29,7 @@ class Usuario
 public:
     Usuario(string em, string pass)
         : email(em), password(pass), suscripcionActiva(nullptr){
-    perfiles=new ListaGenerica<Perfil*();
+    perfiles= new Lista<Perfil*();
             }
      ~Usuario(){delete perfiles; }
 
@@ -90,7 +90,7 @@ public:
     Contenido* llave = contenidos ->obtenerElemento (i);
     int j=i-1;
 
-    while(j>=0 && contenidos -> contenidos->obtenerElemento(j)->getTitulo() > llave->getTitulo()){
+    while(j>=0 && contenidos->obtenerElemento(j)->getTitulo() > llave->getTitulo()){
     contenidos->reemplazar(j+1, contenidos->obtenerElemento(j));
     j--;
     }
@@ -200,7 +200,7 @@ class Factura
 {
 public:
     Factura(string id, string fecha, float monto, string metodo)
-        : idFactura(id), fechaEmision(fecha), montoTotal(monto), metodoPago(metodoPago), estadoPago(true) {}
+        : idFactura(id), fechaEmision(fecha), montoTotal(monto), metodoPago(metodo), estadoPago(true) {}
     ~Factura() {}
 
     string getIdFactura() const { return idFactura; }
