@@ -43,7 +43,7 @@ public:
     }
 
     T obtenerElemento(int indice){
-    if (indice<0 || indice >= _tamanio) return nullptr;
+    if (indice<0 || indice >= _tamanio) return T();
     Nodo<T>* actual=cabeza;
     for( int i=0; i<indice; i++){
         actual=actual->next;
@@ -69,7 +69,7 @@ public:
 void vaciar(){
     while(cabeza != nullptr){
         Nodo<T>* temp = cabeza;
-        cabeza=cabe<a->next;
+        cabeza=cabeza->next;
         delete temp;
     }
     _tamanio=0;
