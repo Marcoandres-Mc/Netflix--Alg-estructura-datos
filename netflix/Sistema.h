@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <fstrema>
 #include "Estructuras.h"
 #include "Entidades.h"
 using namespace std;
@@ -8,8 +9,12 @@ using namespace std;
 class Sistema
 {
 public:
-    Sistema() {}
-    ~Sistema() {}
+    Sistema() {
+        usuarioActual = nullptr;
+    }
+    ~Sistema() {
+        if(usuarioActual != nullptr) delete usuarioActual;
+    }
 
     void iniciar() {
         mostrarBienvenida();
@@ -28,6 +33,9 @@ public:
     }
 
 private:
+
+    Usuario* usuarioActual;
+    Lista<Contenido*>* catalogoGeneral;
 
     void mostrarBienvenida() {
         cout << "========================================\n";
@@ -84,6 +92,16 @@ private:
         } else {
             cout << "\nCredenciales incorrectas.\n";
         }
+
+        usuarioActual=new Usuario(email, password);
+        Suscripcion* sub= new Suscripcion(1, "Premium", 45.90, "2026-05-01");
+        usuarioActual->setSuscripcion(sub);
+
+        Perfil* p1 = new Perfil(1, "Mi Perfil", false);
+        usuarioActual->anadirPerfil(p1);
+
+        cout<<"\nSesion iniciada para: "<<usuarioActual->getEmail();
+        menuUsuario(email);
     }
 
     void menuUsuario(const string& usuario) {
@@ -189,7 +207,7 @@ private:
             case 4: break;
             default: cout << "\nOpcion invalida.\n";
             }
-        } while (opcion != 4);
+        } while (opcion != 5);
     }
 
     void verMetodosPago() {
@@ -208,7 +226,7 @@ private:
 
     void verFacturas() {
         cout << "\n--- Historial de facturas ---\n";
-        issftream archivo("datos/facturas.txt");
+        ifstream archivo("datos/facturas.txt");
         string linea;
         if(archivo.is_open()){
             cout << "ID | Monto   |  Fecha      | Metodo\n";
