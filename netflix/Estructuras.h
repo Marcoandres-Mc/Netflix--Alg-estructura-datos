@@ -42,6 +42,39 @@ public:
         _tamanio++;
     }
 
+    T obtenerElemento(int indice){
+    if (indice<0 || indice >= _tamanio) return nullptr;
+    Nodo<T>* actual=cabeza;
+    for( int i=0; i<indice; i++){
+        actual=actual->next;
+    }
+    return actual->dato;
+}
+
+    void reemplazar (int indice, T nuevoDato){
+    if(indice<0 || indice>= _tamanio) return;
+    Nodo<T>* actual=cabeza;
+    for(int i=0; i<indice; i++){
+        actual=actual->next;
+    }
+    actual->dato = nuevoDato;
+}
+
+    bool buscarRecursivo(Nodo<T>* nodo, T dato){
+    if (nodo==nullptr) return false;
+    if(nodo->dato==dato) return true;
+    return buscarRecursivo(nodo->next, dato);
+}
+
+void vaciar(){
+    while(cabeza != nullptr){
+        Nodo<T>* temp = cabeza;
+        cabeza=cabe<a->next;
+        delete temp;
+    }
+    _tamanio=0;
+}
+
     void eliminar(T dato) {
         if (!cabeza) return;
         if (cabeza->dato == dato) {
