@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <fstrema>
 #include "Estructuras.h"
 #include "Entidades.h"
 using namespace std;
@@ -8,8 +9,12 @@ using namespace std;
 class Sistema
 {
 public:
-    Sistema() {}
-    ~Sistema() {}
+    Sistema() {
+        usuarioActual = nullptr;
+    }
+    ~Sistema() {
+        if(usuarioActual != nullptr) delete usuarioActual;
+    }
 
     void iniciar() {
         mostrarBienvenida();
@@ -28,6 +33,9 @@ public:
     }
 
 private:
+
+    Usuario* usuarioActual;
+    Lista<Contenido*>* catalogoGeneral;
 
     void mostrarBienvenida() {
         cout << "========================================\n";
@@ -60,6 +68,15 @@ private:
         cout << "Numero de tarjeta/cuenta : "; getline(cin, numTarjeta);
         cout << "Titular                  : "; getline(cin, titular);
         cout << "\nUsuario registrado exitosamente. Ya puedes iniciar sesion.\n";
+
+        string tipoPlan = (tipoPago == 3) ? "Premiun" : "Basico";
+        float precio = (tipoPago == 3) ? 45.90 : 24.90;
+
+        Suscripcion* nuevaSub = new Suscripcion(101, tipoPlan, precio, "2026-05-07");
+        cout<<"\nSuscripcion " << nuevaSub->getTipo() << "activada correctamente." <<endl;
+
+        Factura nuevaFactura("F001", "2026-05-07", precio, titular);
+        nuevaFactura.guardarEnArchivo();
     }
     void flujoInicioSesion() {
         cout << "\n--- Inicio de sesion ---\n";
@@ -75,6 +92,16 @@ private:
         } else {
             cout << "\nCredenciales incorrectas.\n";
         }
+
+        usuarioActual=new Usuario(email, password);
+        Suscripcion* sub= new Suscripcion(1, "Premium", 45.90, "2026-05-01");
+        usuarioActual->setSuscripcion(sub);
+
+        Perfil* p1 = new Perfil(1, "Mi Perfil", false);
+        usuarioActual->anadirPerfil(p1);
+
+        cout<<"\nSesion iniciada para: "<<usuarioActual->getEmail();
+        menuUsuario(email);
     }
 
     void menuUsuario(const string& usuario) {
@@ -93,9 +120,27 @@ private:
             case 2: buscarSerie();         break;
             case 3: menuPerfil(usuario);   break;
             case 4: cout << "\nSesion cerrada.\n"; break;
+            case 5: gestionarMiLista(usuario); break;
             default: cout << "\nOpcion invalida.\n";
             }
         } while (opcion != 4);
+    }
+
+    void gestionarMiLista(const string& usuario){
+    cout<<"\n----- Gestionar Mi Lista de Favoritos ----------"<<endl;
+    cout<< " 1. Ver mi Lista ordenada (Alfabeticamente)\n";
+    cout<< " 2. Filtrar por genero (Terror)\n";
+    cout<< "Opcion: ";
+    int op; cin>>op; cin.ignore();
+
+    if (op==1){
+        miPerfilActual->getLista()->ordenarPorTitulo();
+    }
+    else if (op==2){
+        miPerfilActual->getLista()->filtrar([](Contenido* c){
+            return c->getGenero() == "Terror";
+        });
+    }
     }
 
     void explorarSeries() {
@@ -162,7 +207,7 @@ private:
             case 4: break;
             default: cout << "\nOpcion invalida.\n";
             }
-        } while (opcion != 4);
+        } while (opcion != 5);
     }
 
     void verMetodosPago() {
@@ -181,9 +226,15 @@ private:
 
     void verFacturas() {
         cout << "\n--- Historial de facturas ---\n";
-        cout << "ID | Monto   | Fecha      | Metodo\n";
-        cout << "1  | $299.00 | 2026-01-15 | Credito *1111\n";
-        cout << "2  | $299.00 | 2026-02-15 | Credito *1111\n";
-        cout << "3  | $299.00 | 2026-03-15 | Debito  *2222\n";
+        ifstream archivo("datos/facturas.txt");
+        string linea;
+        if(archivo.is_open()){
+            cout << "ID | Monto   |  Fecha      | Metodo\n";
+            while (getline(archivo, linea)){
+                cout<< linea <<endl;
+            }
+            archivo.close();
+        }else{
+            cout<<"No hay facturas registradas en el sistema."<<endl;
     }
 };
