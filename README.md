@@ -23,8 +23,8 @@
 | Código | Apellidos y Nombres |
 | :---: | :--- |
 | U202518934 | Herrera Albites, Marcoandres |
-| .... | .... |
-| .... | .... |
+| U202521899 | Campos Acosta, Fatima Brigit |
+| U20201B873 | Ordaz Hoyos, Carlos Jesús |
 
 <strong> Abril, 2026</strong><br>
 
