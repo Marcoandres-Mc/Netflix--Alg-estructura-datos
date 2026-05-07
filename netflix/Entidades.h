@@ -24,7 +24,8 @@ private:
     MiLista* miListaPersonal;
     };
 
-class Usuario{
+class Usuario
+{
 public:
     Usuario(string em, string pass)
         : email(em), password(pass), suscripcionActiva(nullptr){
