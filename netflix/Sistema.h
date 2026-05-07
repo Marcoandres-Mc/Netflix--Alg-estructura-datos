@@ -60,6 +60,15 @@ private:
         cout << "Numero de tarjeta/cuenta : "; getline(cin, numTarjeta);
         cout << "Titular                  : "; getline(cin, titular);
         cout << "\nUsuario registrado exitosamente. Ya puedes iniciar sesion.\n";
+
+        string tipoPlan = (tipoPago == 3) ? "Premiun" : "Basico";
+        float precio = (tipoPago == 3) ? 45.90 : 24.90;
+
+        Suscripcion* nuevaSub = new Suscripcion(101, tipoPlan, precio, "2026-05-07");
+        cout<<"\nSuscripcion " << nuevaSub->getTipo() << "activada correctamente." <<endl;
+
+        Factura nuevaFactura("F001", "2026-05-07", precio, titular);
+        nuevaFactura.guardarEnArchivo();
     }
     void flujoInicioSesion() {
         cout << "\n--- Inicio de sesion ---\n";
@@ -93,9 +102,27 @@ private:
             case 2: buscarSerie();         break;
             case 3: menuPerfil(usuario);   break;
             case 4: cout << "\nSesion cerrada.\n"; break;
+            case 5: gestionarMiLista(usuario); break;
             default: cout << "\nOpcion invalida.\n";
             }
         } while (opcion != 4);
+    }
+
+    void gestionarMiLista(const string& usuario){
+    cout<<"\n----- Gestionar Mi Lista de Favoritos ----------"<<endl;
+    cout<< " 1. Ver mi Lista ordenada (Alfabeticamente)\n";
+    cout<< " 2. Filtrar por genero (Terror)\n";
+    cout<< "Opcion: ";
+    int op; cin>>op; cin.ignore();
+
+    if (op==1){
+        miPerfilActual->getLista()->ordenarPorTitulo();
+    }
+    else if (op==2){
+        miPerfilActual->getLista()->filtrar([](Contenido* c){
+            return c->getGenero() == "Terror";
+        });
+    }
     }
 
     void explorarSeries() {
@@ -181,9 +208,15 @@ private:
 
     void verFacturas() {
         cout << "\n--- Historial de facturas ---\n";
-        cout << "ID | Monto   | Fecha      | Metodo\n";
-        cout << "1  | $299.00 | 2026-01-15 | Credito *1111\n";
-        cout << "2  | $299.00 | 2026-02-15 | Credito *1111\n";
-        cout << "3  | $299.00 | 2026-03-15 | Debito  *2222\n";
+        issftream archivo("datos/facturas.txt");
+        string linea;
+        if(archivo.is_open()){
+            cout << "ID | Monto   |  Fecha      | Metodo\n";
+            while (getline(archivo, linea)){
+                cout<< linea <<endl;
+            }
+            archivo.close();
+        }else{
+            cout<<"No hay facturas registradas en el sistema."<<endl;
     }
 };
