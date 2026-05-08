@@ -143,8 +143,9 @@ public:
         return tope_->dato;
     }
 
-    bool estaVacia() const { return tope_ == nullptr; }
-    int  tamanio()   const { return _tamanio; }
+    bool     estaVacia() const { return tope_ == nullptr; }
+    int      tamanio()   const { return _tamanio; }
+    Nodo<T>* getTope()   const { return tope_; }
 
 private:
     Nodo<T>* tope_;
@@ -185,8 +186,9 @@ public:
         return frente_->dato;
     }
 
-    bool estaVacia() const { return frente_ == nullptr; }
-    int  tamanio()   const { return _tamanio; }
+    bool     estaVacia()  const { return frente_ == nullptr; }
+    int      tamanio()    const { return _tamanio; }
+    Nodo<T>* getFrente()  const { return frente_; }
 
 private:
     Nodo<T>* frente_;

@@ -1,6 +1,0 @@
-id|tipo|numero|titular
-1|Credito|4111111111111111|Carlos Ordaz
-2|Debito|4222222222222222|Carlos Ordaz
-3|PayPal|carlos@gmail.com|Carlos Ordaz
-4|Credito|5500005555555559|Ana Lopez
-5|Debito|4012888888881881|Pedro Martinez
