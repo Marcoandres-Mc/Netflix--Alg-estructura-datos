@@ -74,6 +74,13 @@ private:
     Pila<string>*       historialBusquedas;
     Cola<Contenido*>*   colaReproduccion;
 
+    bool esNumero(const string& s) const {
+        if (s.empty()) return false;
+        for (char c : s)
+            if (c < '0' || c > '9') return false;
+        return true;
+    }
+
     void linea(char c = '=', int n = 52) const {
         for (int i = 0; i < n; i++) cout << c;
         cout << "\n";
@@ -425,14 +432,14 @@ private:
             if (entrada == "0") break;
             if (entrada == "F" || entrada == "f") filtrarSeriesPorGenero();
             else if (entrada == "O" || entrada == "o") ordenarSeriesPorCalif();
-            else {
-                try {
-                    int sel = stoi(entrada) - 1;
-                    if (sel >= 0 && sel < catalogoSeries->tamanio())
-                        detalleSerie(catalogoSeries->obtenerElemento(sel));
-                    else
-                        cout << "  Opcion invalida.\n";
-                } catch (...) { cout << "  Opcion invalida.\n"; }
+            else if (esNumero(entrada)) {
+                int sel = stoi(entrada) - 1;
+                if (sel >= 0 && sel < catalogoSeries->tamanio())
+                    detalleSerie(catalogoSeries->obtenerElemento(sel));
+                else
+                    cout << "  Opcion invalida.\n";
+            } else {
+                cout << "  Opcion invalida.\n";
             }
         } while (true);
     }
@@ -521,13 +528,14 @@ private:
 
             if (entrada == "0") break;
             if (entrada == "F" || entrada == "f") filtrarPeliculasPorGenero();
-            else {
-                try {
-                    int sel = stoi(entrada) - 1;
-                    if (sel >= 0 && sel < catalogoPeliculas->tamanio())
-                        detallePelicula(catalogoPeliculas->obtenerElemento(sel));
-                    else cout << "  Opcion invalida.\n";
-                } catch (...) { cout << "  Opcion invalida.\n"; }
+            else if (esNumero(entrada)) {
+                int sel = stoi(entrada) - 1;
+                if (sel >= 0 && sel < catalogoPeliculas->tamanio())
+                    detallePelicula(catalogoPeliculas->obtenerElemento(sel));
+                else
+                    cout << "  Opcion invalida.\n";
+            } else {
+                cout << "  Opcion invalida.\n";
             }
         } while (true);
     }
