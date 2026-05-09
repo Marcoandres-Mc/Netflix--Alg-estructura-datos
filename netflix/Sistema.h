@@ -3,9 +3,11 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include "Estructuras.h"
 #include "Entidades.h"
 using namespace std;
+using namespace System;
 
 class Sistema
 {
@@ -55,18 +57,27 @@ public:
             switch (opcion) {
                 case 1: flujoRegistro();     break;
                 case 2: flujoInicioSesion(); break;
-                case 3: linea('-'); cout << "  Hasta luego!\n"; linea('-'); break;
-                default: cout << "  Opcion invalida.\n";
+                case 3:
+                    linea('-');
+                    setColor(ConsoleColor::Green);
+                    cout << "  Hasta luego!\n";
+                    resetColor();
+                    linea('-');
+                    break;
+                default:
+                    setColor(ConsoleColor::DarkRed);
+                    cout << "  Opcion invalida.\n";
+                    resetColor();
             }
         } while (opcion != 3);
     }
 
 private:
-    Usuario*           usuarioActual;
-    Perfil*            perfilActual;
-    Lista<Serie*>*     catalogoSeries;
-    Lista<Pelicula*>*  catalogoPeliculas;
-    Lista<Categoria*>* categorias;
+    Usuario*            usuarioActual;
+    Perfil*             perfilActual;
+    Lista<Serie*>*      catalogoSeries;
+    Lista<Pelicula*>*   catalogoPeliculas;
+    Lista<Categoria*>*  categorias;
     Lista<MetodoPago*>* metodosPago;
     Lista<Factura*>*    facturas;
     int contadorFactura;
@@ -74,6 +85,32 @@ private:
     Pila<string>*       historialBusquedas;
     Cola<Contenido*>*   colaReproduccion;
 
+    void setColor(ConsoleColor c) const { Console::ForegroundColor = c; }
+    void resetColor() const { Console::ForegroundColor = ConsoleColor::White; }
+
+    void menuOp(const string& key, const string& desc) const {
+        cout << "  ";
+        setColor(ConsoleColor::Yellow);
+        cout << key;
+        resetColor();
+        cout << ". " << desc << "\n";
+    }
+    void promptOpcion() const {
+        setColor(ConsoleColor::Green);
+        cout << "  Opcion: ";
+        resetColor();
+    }
+    void msgOk(const string& msg) const {
+        setColor(ConsoleColor::Green);
+        cout << msg;
+        resetColor();
+    }
+    void msgErr(const string& msg) const {
+        setColor(ConsoleColor::DarkRed);
+        cout << msg;
+        resetColor();
+    }
+    
     bool esNumero(const string& s) const {
         if (s.empty()) return false;
         for (char c : s)
@@ -82,17 +119,25 @@ private:
     }
 
     void linea(char c = '=', int n = 52) const {
+        setColor(c == '=' ? ConsoleColor::Red : ConsoleColor::DarkGray);
         for (int i = 0; i < n; i++) cout << c;
         cout << "\n";
+        resetColor();
     }
+
     void titulo(const string& t) const {
         linea('=');
+        setColor(ConsoleColor::Yellow);
         int pad = (52 - (int)t.size()) / 2;
         cout << string(pad, ' ') << t << "\n";
         linea('=');
+        resetColor();
     }
+
     void pausa() const {
+        setColor(ConsoleColor::DarkCyan);
         cout << "\n  Presiona Enter para continuar...";
+        resetColor();
         cin.ignore();
     }
 
@@ -241,41 +286,59 @@ private:
         facturas->vaciar();
     }
 
+    // ── Pantalla de bienvenida con logo ASCII ─────────────────────
     void mostrarBienvenida() const {
-        titulo("  NETFLIX - Sistema de Streaming  ");
+        Console::Clear();
+        setColor(ConsoleColor::Red);
+        cout << "\n";
+        cout << "      #   # ##### ##### ##### #     ### #   #\n";
+        cout << "      ##  # #       #   #     #      #   # # \n";
+        cout << "      # # # ####    #   ####  #      #     #  \n";
+        cout << "      #  ## #       #   #     #      #   # # \n";
+        cout << "      #   # #####   #   #     ##### ###  #   #\n";
+        cout << "\n";
+        linea('=');
+        setColor(ConsoleColor::Gray);
+        cout << "           Sistema de Streaming\n";
+        linea('-');
+        resetColor();
         cout << "  Bienvenido a la plataforma de entretenimiento.\n";
         linea('-');
     }
 
     void mostrarMenuPrincipal() const {
         linea('-');
+        setColor(ConsoleColor::Yellow);
         cout << "  MENU PRINCIPAL\n";
+        resetColor();
         linea('-');
-        cout << "  1. Registrarse\n";
-        cout << "  2. Iniciar sesion\n";
-        cout << "  3. Salir\n";
+        menuOp("1", "Registrarse");
+        menuOp("2", "Iniciar sesion");
+        menuOp("3", "Salir");
         linea('-');
-        cout << "  Opcion: ";
+        promptOpcion();
     }
 
     void flujoRegistro() {
         titulo("        REGISTRO DE USUARIO       ");
         string nombre, email, password;
+        setColor(ConsoleColor::Cyan);
         cout << "  Nombre       : "; getline(cin, nombre);
         cout << "  Email        : "; getline(cin, email);
         cout << "  Contrasena   : "; getline(cin, password);
+        resetColor();
 
         if (Usuario::existeUsuario(email)) {
-            cout << "\n  El email ya esta registrado. Usa otro.\n";
+            msgErr("\n  El email ya esta registrado. Usa otro.\n");
             pausa(); return;
         }
 
         cout << "\n  Selecciona plan de suscripcion:\n";
-        cout << "  1. Basico   - S/. 24.90/mes\n";
-        cout << "  2. Estandar - S/. 35.90/mes\n";
-        cout << "  3. Premium  - S/. 45.90/mes\n";
+        menuOp("1", "Basico   - S/. 24.90/mes");
+        menuOp("2", "Estandar - S/. 35.90/mes");
+        menuOp("3", "Premium  - S/. 45.90/mes");
         linea('-');
-        cout << "  Opcion: ";
+        promptOpcion();
         int plan; cin >> plan; cin.ignore();
 
         string tipoPlan; float precio;
@@ -298,23 +361,25 @@ private:
 
         Factura* fac = new Factura(idFactura(), fechaHoy(), precio, "Pendiente");
         fac->guardarEnArchivo();
-        cout << "\n  Registro exitoso! Factura generada:\n";
+        msgOk("\n  Registro exitoso! Factura generada:\n");
         fac->mostrar();
         delete fac;
         delete nuevoU;
 
-        cout << "\n  Ya puedes iniciar sesion.\n";
+        msgOk("\n  Ya puedes iniciar sesion.\n");
         pausa();
     }
 
     void flujoInicioSesion() {
         titulo("       INICIO DE SESION          ");
         string email, password;
+        setColor(ConsoleColor::Cyan);
         cout << "  Email      : "; getline(cin, email);
         cout << "  Contrasena : "; getline(cin, password);
+        resetColor();
 
         if (!Usuario::validarCredenciales(email, password)) {
-            cout << "\n  Credenciales incorrectas.\n";
+            msgErr("\n  Credenciales incorrectas.\n");
             pausa(); return;
         }
 
@@ -369,7 +434,10 @@ private:
         cargarMetodosPago();
         cargarFacturas();
 
-        cout << "\n  Bienvenido/a, " << email << "!\n";
+        msgOk("\n  Bienvenido/a, ");
+        setColor(ConsoleColor::Green);
+        cout << email << "!\n";
+        resetColor();
         pausa();
         menuUsuario();
 
@@ -384,18 +452,20 @@ private:
         int op;
         do {
             titulo("        MENU PRINCIPAL          ");
+            setColor(ConsoleColor::Cyan);
             cout << "  Usuario: " << usuarioActual->getEmail() << "\n";
             cout << "  Perfil : " << perfilActual->getNombre() << "\n";
+            resetColor();
             linea('-');
-            cout << "  1. Explorar Series\n";
-            cout << "  2. Explorar Peliculas\n";
-            cout << "  3. Buscar contenido\n";
-            cout << "  4. Mi Lista de Favoritos\n";
-            cout << "  5. Cola de Reproduccion\n";
-            cout << "  6. Mi Perfil y Cuenta\n";
-            cout << "  7. Cerrar sesion\n";
+            menuOp("1", "Explorar Series");
+            menuOp("2", "Explorar Peliculas");
+            menuOp("3", "Buscar contenido");
+            menuOp("4", "Mi Lista de Favoritos");
+            menuOp("5", "Cola de Reproduccion");
+            menuOp("6", "Mi Perfil y Cuenta");
+            menuOp("7", "Cerrar sesion");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             cin >> op; cin.ignore();
             switch (op) {
                 case 1: menuSeries();      break;
@@ -404,8 +474,11 @@ private:
                 case 4: menuMiLista();     break;
                 case 5: menuCola();        break;
                 case 6: menuCuenta();      break;
-                case 7: cout << "\n  Sesion cerrada correctamente.\n"; break;
-                default: cout << "  Opcion invalida.\n";
+                case 7:
+                    msgOk("\n  Sesion cerrada correctamente.\n");
+                    break;
+                default:
+                    msgErr("  Opcion invalida.\n");
             }
         } while (op != 7);
     }
@@ -416,17 +489,19 @@ private:
             int idx = 1;
             Nodo<Serie*>* nodo = catalogoSeries->getCabeza();
             while (nodo) {
+                setColor(ConsoleColor::Cyan);
                 cout << "  " << idx++ << ". ";
+                resetColor();
                 nodo->dato->mostrarResumen();
                 nodo = nodo->next;
             }
             linea('-');
-            cout << "  1-" << catalogoSeries->tamanio() << ". Ver detalle\n";
-            cout << "  F. Filtrar por genero\n";
-            cout << "  O. Ordenar por calificacion\n";
-            cout << "  0. Volver\n";
+            menuOp("1-" + to_string(catalogoSeries->tamanio()), "Ver detalle");
+            menuOp("F", "Filtrar por genero");
+            menuOp("O", "Ordenar por calificacion");
+            menuOp("0", "Volver");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             string entrada; getline(cin, entrada);
 
             if (entrada == "0") break;
@@ -437,9 +512,9 @@ private:
                 if (sel >= 0 && sel < catalogoSeries->tamanio())
                     detalleSerie(catalogoSeries->obtenerElemento(sel));
                 else
-                    cout << "  Opcion invalida.\n";
+                    msgErr("  Opcion invalida.\n");
             } else {
-                cout << "  Opcion invalida.\n";
+                msgErr("  Opcion invalida.\n");
             }
         } while (true);
     }
@@ -448,12 +523,12 @@ private:
         titulo("       DETALLE DE SERIE         ");
         s->mostrarDetalle();
         linea('-');
-        cout << "  1. Agregar a Mi Lista\n";
-        cout << "  2. Calificar serie\n";
-        cout << "  3. Agregar a Cola de Reproduccion\n";
-        cout << "  0. Volver\n";
+        menuOp("1", "Agregar a Mi Lista");
+        menuOp("2", "Calificar serie");
+        menuOp("3", "Agregar a Cola de Reproduccion");
+        menuOp("0", "Volver");
         linea('-');
-        cout << "  Opcion: ";
+        promptOpcion();
         int op; cin >> op; cin.ignore();
         switch (op) {
             case 1: agregarAMiLista(s);           break;
@@ -463,19 +538,23 @@ private:
     }
 
     void calificarSerie(Serie* s) {
-        cout << "  Puntaje (1-5): ";
+        setColor(ConsoleColor::Cyan); cout << "  Puntaje (1-5): "; resetColor();
         int puntaje; cin >> puntaje; cin.ignore();
-        if (puntaje < 1 || puntaje > 5) { cout << "  Puntaje invalido.\n"; return; }
-        cout << "  Comentario   : "; string comentario; getline(cin, comentario);
+        if (puntaje < 1 || puntaje > 5) { msgErr("  Puntaje invalido.\n"); return; }
+        setColor(ConsoleColor::Cyan); cout << "  Comentario   : "; resetColor();
+        string comentario; getline(cin, comentario);
         s->agregarCalificacion(
             new Calificacion(puntaje, comentario, usuarioActual->getEmail()));
-        cout << "  Calificacion registrada. Nuevo promedio: "
-             << fixed << setprecision(1) << s->getCalificacionPromedio() << "/5\n";
+        msgOk("  Calificacion registrada. Nuevo promedio: ");
+        setColor(ConsoleColor::Green);
+        cout << fixed << setprecision(1) << s->getCalificacionPromedio() << "/5\n";
+        resetColor();
         pausa();
     }
 
     void filtrarSeriesPorGenero() {
-        cout << "  Genero a filtrar: "; string genero; getline(cin, genero);
+        setColor(ConsoleColor::Cyan); cout << "  Genero a filtrar: "; resetColor();
+        string genero; getline(cin, genero);
         titulo("     SERIES FILTRADAS           ");
         bool encontrado = false;
         Nodo<Serie*>* nodo = catalogoSeries->getCabeza();
@@ -486,7 +565,7 @@ private:
             }
         };
         while (nodo) { mostrarSiGenero(nodo->dato); nodo = nodo->next; }
-        if (!encontrado) cout << "  No hay series del genero '" << genero << "'.\n";
+        if (!encontrado) msgErr("  No hay series del genero '" + genero + "'.\n");
         pausa();
     }
 
@@ -506,7 +585,7 @@ private:
             }
             if (!intercambiado) break;
         }
-        cout << "  Series ordenadas por calificacion (algoritmo de intercambio).\n";
+        msgOk("  Series ordenadas por calificacion (algoritmo de intercambio).\n");
         pausa();
     }
 
@@ -514,16 +593,20 @@ private:
         do {
             titulo("        PELICULAS              ");
             Nodo<Pelicula*>* nodo = catalogoPeliculas->getCabeza();
+            int idx = 1;
             while (nodo) {
+                setColor(ConsoleColor::Cyan);
+                cout << "  " << idx++ << ". ";
+                resetColor();
                 nodo->dato->mostrarResumen();
                 nodo = nodo->next;
             }
             linea('-');
-            cout << "  1-" << catalogoPeliculas->tamanio() << ". Ver detalle\n";
-            cout << "  F. Filtrar por genero\n";
-            cout << "  0. Volver\n";
+            menuOp("1-" + to_string(catalogoPeliculas->tamanio()), "Ver detalle");
+            menuOp("F", "Filtrar por genero");
+            menuOp("0", "Volver");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             string entrada; getline(cin, entrada);
 
             if (entrada == "0") break;
@@ -533,9 +616,9 @@ private:
                 if (sel >= 0 && sel < catalogoPeliculas->tamanio())
                     detallePelicula(catalogoPeliculas->obtenerElemento(sel));
                 else
-                    cout << "  Opcion invalida.\n";
+                    msgErr("  Opcion invalida.\n");
             } else {
-                cout << "  Opcion invalida.\n";
+                msgErr("  Opcion invalida.\n");
             }
         } while (true);
     }
@@ -544,18 +627,19 @@ private:
         titulo("      DETALLE DE PELICULA       ");
         p->mostrarDetalle();
         linea('-');
-        cout << "  1. Agregar a Mi Lista\n";
-        cout << "  2. Agregar a Cola de Reproduccion\n";
-        cout << "  0. Volver\n";
+        menuOp("1", "Agregar a Mi Lista");
+        menuOp("2", "Agregar a Cola de Reproduccion");
+        menuOp("0", "Volver");
         linea('-');
-        cout << "  Opcion: ";
+        promptOpcion();
         int op; cin >> op; cin.ignore();
         if (op == 1) agregarAMiLista(p);
         if (op == 2) agregarACola(p);
     }
 
     void filtrarPeliculasPorGenero() {
-        cout << "  Genero a filtrar: "; string genero; getline(cin, genero);
+        setColor(ConsoleColor::Cyan); cout << "  Genero a filtrar: "; resetColor();
+        string genero; getline(cin, genero);
         titulo("    PELICULAS FILTRADAS          ");
         bool encontrado = false;
         Nodo<Pelicula*>* nodo = catalogoPeliculas->getCabeza();
@@ -567,26 +651,27 @@ private:
             }
         };
         while (nodo) { mostrarSiGenero(nodo->dato); nodo = nodo->next; }
-        if (!encontrado) cout << "  No hay peliculas del genero '" << genero << "'.\n";
+        if (!encontrado) msgErr("  No hay peliculas del genero '" + genero + "'.\n");
         pausa();
     }
 
     void agregarACola(Contenido* c) {
+        msgOk("  '" + c->getTitulo() + "' agregado a la cola de reproduccion.\n");
         colaReproduccion->encolar(c);
-        cout << "  '" << c->getTitulo() << "' agregado a la cola de reproduccion.\n";
         pausa();
     }
 
     void mostrarHistorial() {
         titulo("  HISTORIAL DE BUSQUEDAS       ");
         if (historialBusquedas->estaVacia()) {
-            cout << "  No hay busquedas recientes.\n";
+            msgErr("  No hay busquedas recientes.\n");
             pausa(); return;
         }
         int i = 1;
         Nodo<string>* nodo = historialBusquedas->getTope();
         while (nodo) {
-            cout << "  " << i++ << ". " << nodo->dato << "\n";
+            setColor(ConsoleColor::Cyan); cout << "  " << i++ << ". "; resetColor();
+            cout << nodo->dato << "\n";
             nodo = nodo->next;
         }
         pausa();
@@ -597,31 +682,35 @@ private:
         do {
             titulo("    COLA DE REPRODUCCION       ");
             if (colaReproduccion->estaVacia()) {
-                cout << "  La cola esta vacia.\n";
+                msgErr("  La cola esta vacia.\n");
             } else {
-                cout << "  Siguiente: " << colaReproduccion->frente()->getTitulo() << "\n";
+                setColor(ConsoleColor::Cyan); cout << "  Siguiente: "; resetColor();
+                cout << colaReproduccion->frente()->getTitulo() << "\n";
                 linea('-');
                 int i = 1;
                 Nodo<Contenido*>* nodo = colaReproduccion->getFrente();
                 while (nodo) {
-                    cout << "  " << i++ << ". " << nodo->dato->getTitulo() << "\n";
+                    setColor(ConsoleColor::Yellow); cout << "  " << i++ << ". "; resetColor();
+                    cout << nodo->dato->getTitulo() << "\n";
                     nodo = nodo->next;
                 }
             }
             linea('-');
-            cout << "  1. Reproducir siguiente\n";
-            cout << "  0. Volver\n";
+            menuOp("1", "Reproducir siguiente");
+            menuOp("0", "Volver");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             cin >> op; cin.ignore();
             if (op == 1) {
                 if (!colaReproduccion->estaVacia()) {
+                    setColor(ConsoleColor::Magenta);
                     cout << "\n  Reproduciendo: " << colaReproduccion->frente()->getTitulo() << "\n";
+                    resetColor();
                     colaReproduccion->frente()->mostrarDetalle();
                     colaReproduccion->desencolar();
                     pausa();
                 } else {
-                    cout << "  No hay contenido en la cola.\n";
+                    msgErr("  No hay contenido en la cola.\n");
                     pausa();
                 }
             }
@@ -630,10 +719,12 @@ private:
 
     void agregarAMiLista(Contenido* c) {
         if (perfilActual->buscarEnLista(0, c->getTitulo())) {
+            setColor(ConsoleColor::DarkYellow);
             cout << "  '" << c->getTitulo() << "' ya esta en tu lista.\n";
+            resetColor();
         } else {
             perfilActual->getLista()->agregarContenido(c);
-            cout << "  '" << c->getTitulo() << "' agregado a tu lista.\n";
+            msgOk("  '" + c->getTitulo() + "' agregado a tu lista.\n");
         }
         pausa();
     }
@@ -652,9 +743,10 @@ private:
 
     void menuBuscar() {
         titulo("     BUSCAR CONTENIDO           ");
-        cout << "  H. Ver historial de busquedas\n";
+        menuOp("H", "Ver historial de busquedas");
         linea('-');
-        cout << "  Titulo a buscar: "; string t; getline(cin, t);
+        setColor(ConsoleColor::Cyan); cout << "  Titulo a buscar: "; resetColor();
+        string t; getline(cin, t);
 
         if (t == "H" || t == "h") { mostrarHistorial(); return; }
 
@@ -662,10 +754,12 @@ private:
 
         Serie* s = buscarSerie(catalogoSeries->getCabeza(), t);
         if (s) {
-            cout << "\n  Serie encontrada:\n";
+            msgOk("\n  Serie encontrada:\n");
             s->mostrarDetalle();
             linea('-');
-            cout << "  1. Agregar a Mi Lista  0. Volver\n  Opcion: ";
+            menuOp("1", "Agregar a Mi Lista");
+            menuOp("0", "Volver");
+            promptOpcion();
             int op; cin >> op; cin.ignore();
             if (op == 1) agregarAMiLista(s);
             return;
@@ -673,16 +767,18 @@ private:
 
         Pelicula* p = buscarPelicula(catalogoPeliculas->getCabeza(), t);
         if (p) {
-            cout << "\n  Pelicula encontrada:\n";
+            msgOk("\n  Pelicula encontrada:\n");
             p->mostrarDetalle();
             linea('-');
-            cout << "  1. Agregar a Mi Lista  0. Volver\n  Opcion: ";
+            menuOp("1", "Agregar a Mi Lista");
+            menuOp("0", "Volver");
+            promptOpcion();
             int op; cin >> op; cin.ignore();
             if (op == 1) agregarAMiLista(p);
             return;
         }
 
-        cout << "\n  No se encontro contenido con ese titulo.\n";
+        msgErr("\n  No se encontro contenido con ese titulo.\n");
         pausa();
     }
 
@@ -693,32 +789,36 @@ private:
             titulo("      MI LISTA DE FAVORITOS    ");
             lista->mostrar();
             linea('-');
-            cout << "  1. Ordenar alfabeticamente (intercambio)\n";
-            cout << "  2. Filtrar por genero (lambda)\n";
-            cout << "  3. Buscar titulo en mi lista (recursivo)\n";
-            cout << "  4. Guardar mi lista\n";
-            cout << "  0. Volver\n";
+            menuOp("1", "Ordenar alfabeticamente (intercambio)");
+            menuOp("2", "Filtrar por genero (lambda)");
+            menuOp("3", "Buscar titulo en mi lista (recursivo)");
+            menuOp("4", "Guardar mi lista");
+            menuOp("0", "Volver");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             cin >> op; cin.ignore();
             switch (op) {
                 case 1:
                     lista->ordenarPorTitulo();
+                    msgOk("  Lista ordenada alfabeticamente.\n");
                     pausa(); break;
                 case 2: {
-                    cout << "  Genero a filtrar: "; string g; getline(cin, g);
+                    setColor(ConsoleColor::Cyan); cout << "  Genero a filtrar: "; resetColor();
+                    string g; getline(cin, g);
                     lista->filtrar([&g](Contenido* c) { return c->getGenero() == g; });
                     pausa(); break;
                 }
                 case 3: {
-                    cout << "  Titulo a buscar: "; string t; getline(cin, t);
+                    setColor(ConsoleColor::Cyan); cout << "  Titulo a buscar: "; resetColor();
+                    string t; getline(cin, t);
                     bool enc = perfilActual->buscarEnLista(0, t);
-                    cout << "  " << (enc ? "Encontrado en tu lista." : "No esta en tu lista.") << "\n";
+                    if (enc) msgOk("  Encontrado en tu lista.\n");
+                    else     msgErr("  No esta en tu lista.\n");
                     pausa(); break;
                 }
                 case 4:
                     perfilActual->guardarMiLista(usuarioActual->getEmail());
-                    cout << "  Lista guardada.\n"; pausa(); break;
+                    msgOk("  Lista guardada.\n"); pausa(); break;
             }
         } while (op != 0);
     }
@@ -727,18 +827,20 @@ private:
         int op;
         do {
             titulo("       MI PERFIL Y CUENTA      ");
+            setColor(ConsoleColor::Cyan);
             cout << "  Email  : " << usuarioActual->getEmail() << "\n";
             cout << "  Perfil : " << perfilActual->getNombre() << "\n";
+            resetColor();
             if (usuarioActual->getSuscripcion())
                 usuarioActual->getSuscripcion()->mostrar();
             linea('-');
-            cout << "  1. Ver metodos de pago\n";
-            cout << "  2. Agregar metodo de pago\n";
-            cout << "  3. Ver historial de facturas\n";
-            cout << "  4. Cambiar plan\n";
-            cout << "  0. Volver\n";
+            menuOp("1", "Ver metodos de pago");
+            menuOp("2", "Agregar metodo de pago");
+            menuOp("3", "Ver historial de facturas");
+            menuOp("4", "Cambiar plan");
+            menuOp("0", "Volver");
             linea('-');
-            cout << "  Opcion: ";
+            promptOpcion();
             cin >> op; cin.ignore();
             switch (op) {
                 case 1: verMetodosPago();    break;
@@ -752,9 +854,11 @@ private:
     void verMetodosPago() {
         titulo("      METODOS DE PAGO          ");
         if (metodosPago->estaVacia()) {
-            cout << "  No tienes metodos de pago registrados.\n";
+            msgErr("  No tienes metodos de pago registrados.\n");
         } else {
+            setColor(ConsoleColor::Cyan);
             cout << "  ID  | Tipo     | Numero               | Titular\n";
+            resetColor();
             linea('-');
             Nodo<MetodoPago*>* n = metodosPago->getCabeza();
             auto mostrar = [](MetodoPago* m) { m->mostrar(); };
@@ -765,14 +869,16 @@ private:
 
     void agregarMetodoPago() {
         titulo("   AGREGAR METODO DE PAGO      ");
-        cout << "  Tipo (Credito/Debito/PayPal): "; string tipo;   getline(cin, tipo);
-        cout << "  Numero                      : "; string numero; getline(cin, numero);
+        setColor(ConsoleColor::Cyan);
+        cout << "  Tipo (Credito/Debito/PayPal): "; string tipo;    getline(cin, tipo);
+        cout << "  Numero                      : "; string numero;  getline(cin, numero);
         cout << "  Titular                     : "; string titular; getline(cin, titular);
+        resetColor();
 
         MetodoPago* mp = new MetodoPago(contadorMetodo++, tipo, numero, titular);
         metodosPago->insertarFinal(mp);
         mp->guardarEnArchivo(usuarioActual->getEmail());
-        cout << "  Metodo de pago agregado correctamente.\n";
+        msgOk("  Metodo de pago agregado correctamente.\n");
         pausa();
     }
 
@@ -780,14 +886,20 @@ private:
         titulo("     HISTORIAL DE FACTURAS     ");
         if (facturas->estaVacia()) {
             ifstream f("facturas.txt");
-            if (!f.is_open()) { cout << "  No hay facturas registradas.\n"; pausa(); return; }
-            string fila;
+            if (!f.is_open()) {
+                msgErr("  No hay facturas registradas.\n"); pausa(); return;
+            }
+            setColor(ConsoleColor::Cyan);
             cout << "  ID    | Fecha      | Monto     | Metodo\n";
+            resetColor();
             linea('-');
+            string fila;
             while (getline(f, fila)) cout << "  " << fila << "\n";
             f.close();
         } else {
+            setColor(ConsoleColor::Cyan);
             cout << "  ID    | Fecha      | Monto     | Metodo\n";
+            resetColor();
             linea('-');
             Nodo<Factura*>* n = facturas->getCabeza();
             auto mostrar = [](Factura* fac) { fac->mostrar(); };
@@ -798,11 +910,11 @@ private:
 
     void cambiarPlan() {
         titulo("        CAMBIAR PLAN           ");
-        cout << "  1. Basico   - S/. 24.90/mes\n";
-        cout << "  2. Estandar - S/. 35.90/mes\n";
-        cout << "  3. Premium  - S/. 45.90/mes\n";
+        menuOp("1", "Basico   - S/. 24.90/mes");
+        menuOp("2", "Estandar - S/. 35.90/mes");
+        menuOp("3", "Premium  - S/. 45.90/mes");
         linea('-');
-        cout << "  Opcion: ";
+        promptOpcion();
         int op; cin >> op; cin.ignore();
 
         string tipo; float precio;
@@ -818,7 +930,11 @@ private:
         Factura* fac = new Factura(idFactura(), fechaHoy(), precio, "Cambio de plan");
         fac->guardarEnArchivo();
         facturas->insertarFinal(fac);
-        cout << "  Plan actualizado a " << tipo << ". Factura generada:\n";
+        msgOk("  Plan actualizado a ");
+        setColor(ConsoleColor::Green);
+        cout << tipo << ". ";
+        resetColor();
+        cout << "Factura generada:\n";
         fac->mostrar();
         pausa();
     }
