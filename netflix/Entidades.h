@@ -14,9 +14,9 @@ public:
 
     int    getId()          const { return id; }
     string getNombre()      const { return nombre; }
-    string getDescripcion() const { return descripcion; }
+    string getDescripcion() { return descripcion; }
 
-    void mostrar() const {
+    void mostrar() {
         cout << "[" << id << "] " << nombre << " - " << descripcion << endl;
     }
 
@@ -35,7 +35,7 @@ public:
           duracion(duracion), clasificacionEdad(clasificacionEdad),
           categoria(categoria) {}
 
-    virtual ~Contenido() {}
+    ~Contenido() {}
 
     int    getId()               const { return id; }
     string getTitulo()           const { return titulo; }
@@ -44,7 +44,7 @@ public:
     int    getDuracion()         const { return duracion; }
     string getClasificacion()    const { return clasificacionEdad; }
 
-    virtual void mostrarDetalle() const {
+    void mostrarDetalle() {
         cout << "  Titulo       : " << titulo           << "\n";
         cout << "  Genero       : " << genero           << "\n";
         cout << "  Anio         : " << anio             << "\n";
@@ -54,7 +54,7 @@ public:
             cout << "  Categoria    : " << categoria->getNombre() << "\n";
     }
 
-    bool esAptaParaPerfil(bool esInfantil) const {
+    bool esAptaParaPerfil(bool esInfantil) {
         return !(esInfantil && clasificacionEdad != "ATP");
     }
 
@@ -71,13 +71,13 @@ protected:
 class Episodio
 {
 public:
-    Episodio(int numero, const string& titulo, int duracion)
+    Episodio(int numero, string titulo, int duracion)
         : numero(numero), titulo(titulo), duracion(duracion) {}
     ~Episodio() {}
 
     int    getNumero()   const { return numero; }
     string getTitulo()   const { return titulo; }
-    int    getDuracion() const { return duracion; }
+    int    getDuracion() { return duracion; }
 
 private:
     int    numero;
@@ -88,12 +88,12 @@ private:
 class Calificacion
 {
 public:
-    Calificacion(int puntaje, const string& comentario, const string& usuario)
+    Calificacion(int puntaje, string comentario, string usuario)
         : puntaje(puntaje), comentario(comentario), usuario(usuario) {}
     ~Calificacion() {}
 
     int    getPuntaje()    const { return puntaje; }
-    string getComentario() const { return comentario; }
+    string getComentario() { return comentario; }
     string getUsuario()    const { return usuario; }
 
 private:
@@ -117,7 +117,7 @@ public:
     int               getAnio()     const { return anio; }
     Lista<Episodio*>& getEpisodios()      { return episodios; }
 
-    void mostrar() const {
+    void mostrar() {
         cout << "    Temporada " << numero << " (" << anio << ") - "
              << episodios.tamanio() << " episodio(s)\n";
     }
@@ -131,9 +131,9 @@ private:
 class Serie : public Contenido
 {
 public:
-    Serie(int id, const string& titulo, const string& genero,
-          const string& descripcion,
-          const string& clasificacion = "ATP", Categoria* cat = nullptr)
+    Serie(int id, string titulo, string genero,
+          string descripcion,
+          string clasificacion = "ATP", Categoria* cat = nullptr)
         : Contenido(id, titulo, genero, 0, 0, clasificacion, cat),
           descripcion(descripcion) {}
 
@@ -148,7 +148,7 @@ public:
     void agregarCalificacion(Calificacion* c) { calificaciones.insertarFinal(c); }
 
     float calcularPromedio(Nodo<Calificacion*>* nodo,
-                                    float suma, int count) const {
+                                    float suma, int count) {
         if (nodo == nullptr)
             return (count == 0) ? 0.0f : suma / count;
         return calcularPromedio(nodo->next,
@@ -156,22 +156,22 @@ public:
                                          count + 1);
     }
 
-    float getCalificacionPromedio() const {
+    float getCalificacionPromedio() {
         return calcularPromedio(calificaciones.getCabeza(), 0.0f, 0);
     }
 
-    string                getDescripcion() const { return descripcion; }
+    string                getDescripcion() { return descripcion; }
     Lista<Temporada*>&    getTemporadas()        { return temporadas; }
     Lista<Calificacion*>& getCalificaciones()    { return calificaciones; }
 
-    void mostrarResumen() const {
+    void mostrarResumen() {
         cout << "  [" << id << "] " << titulo
              << " | " << genero
              << " | Temp: " << temporadas.tamanio()
              << " | Calif: " << fixed << setprecision(1) << getCalificacionPromedio() << "/5\n";
     }
 
-    void mostrarDetalle() const override {
+    void mostrarDetalle() {
         cout << "  Titulo     : " << titulo      << "\n";
         cout << "  Genero     : " << genero      << "\n";
         cout << "  Descripcion: " << descripcion << "\n";
@@ -181,7 +181,7 @@ public:
         while (t) { t->dato->mostrar(); t = t->next; }
     }
 
-    void guardarEnArchivo() const {
+    void guardarEnArchivo() {
         ofstream f("series.txt", ios::app);
         if (f.is_open()) {
             f << id << "|" << titulo << "|" << genero << "|"
@@ -210,29 +210,27 @@ public:
     }
 
     int        getCantidad()           const { return cantidadElementos; }
-    Contenido* getContenidoEn(int idx) const { return contenidos->obtenerElemento(idx); }
+    Contenido* getContenidoEn(int idx) { return contenidos->obtenerElemento(idx); }
 
     void ordenarPorTitulo() {
         if (cantidadElementos < 2) return;
-        bool intercambiado;
-        for (int i = 0; i < cantidadElementos - 1; i++) {
-            intercambiado = false;
-            for (int j = 0; j < cantidadElementos - 1 - i; j++) {
-                if (contenidos->obtenerElemento(j)->getTitulo() >
-                    contenidos->obtenerElemento(j + 1)->getTitulo()) {
-                    Contenido* tmp = contenidos->obtenerElemento(j);
-                    contenidos->reemplazar(j,     contenidos->obtenerElemento(j + 1));
-                    contenidos->reemplazar(j + 1, tmp);
-                    intercambiado = true;
+        for (int gap = cantidadElementos / 2; gap > 0; gap /= 2) {
+            for (int i = gap; i < cantidadElementos; i++) {
+                Contenido* temp = contenidos->obtenerElemento(i);
+                int j = i;
+                while (j >= gap &&
+                       contenidos->obtenerElemento(j - gap)->getTitulo() > temp->getTitulo()) {
+                    contenidos->reemplazar(j, contenidos->obtenerElemento(j - gap));
+                    j -= gap;
                 }
+                contenidos->reemplazar(j, temp);
             }
-            if (!intercambiado) break;
         }
-        cout << "  Lista ordenada alfabeticamente (algoritmo de intercambio).\n";
+        cout << "  Lista ordenada alfabeticamente (Shell sort).\n";
     }
 
-    template<typename Predicado>
-    void filtrar(Predicado criterio) const {
+    template<class T>
+    void filtrar(T criterio) {
         bool encontrado = false;
         for (int i = 0; i < cantidadElementos; i++) {
             Contenido* item = contenidos->obtenerElemento(i);
@@ -246,7 +244,7 @@ public:
             cout << "  No hay elementos que coincidan con el criterio.\n";
     }
 
-    void mostrar() const {
+    void mostrar() {
         if (cantidadElementos == 0) {
             cout << "  Tu lista esta vacia.\n"; return;
         }
@@ -256,7 +254,7 @@ public:
         }
     }
 
-    bool estaVacia() const { return cantidadElementos == 0; }
+    bool estaVacia() { return cantidadElementos == 0; }
 
 private:
     Lista<Contenido*>* contenidos;
@@ -274,17 +272,17 @@ public:
 
     int      getId()        const { return id; }
     string   getNombre()    const { return nombre; }
-    bool     getEsInfantil() const { return esInfantil; }
+    bool     getEsInfantil() { return esInfantil; }
     MiLista* getLista()           { return miListaPersonal; }
 
-    bool buscarEnLista(int index, const string& tituloBuscado) {
+    bool buscarEnLista(int index, string tituloBuscado) {
         if (index >= miListaPersonal->getCantidad()) return false;
         if (miListaPersonal->getContenidoEn(index)->getTitulo() == tituloBuscado)
             return true;
         return buscarEnLista(index + 1, tituloBuscado);
     }
 
-    void guardarEnArchivo(const string& emailUsuario) const {
+    void guardarEnArchivo(string emailUsuario) {
         ofstream f("perfiles.txt", ios::app);
         if (f.is_open()) {
             f << id << "|" << nombre << "|"
@@ -293,7 +291,7 @@ public:
         }
     }
 
-    void guardarMiLista(const string& emailUsuario) const {
+    void guardarMiLista(string emailUsuario) {
         ofstream f("milista.txt", ios::app);
         if (f.is_open()) {
             for (int i = 0; i < miListaPersonal->getCantidad(); i++) {
@@ -322,7 +320,7 @@ public:
     string getTipo()         const { return tipo; }
     float  getPrecio()       const { return precio; }
     string getFechaInicio()  const { return fechaInicio; }
-    int    getIdSuscripcion() const { return idSuscripcion; }
+    int    getIdSuscripcion() { return idSuscripcion; }
 
     void actualizarPlan(string nuevoPlan, float nuevoPrecio) {
         tipo   = nuevoPlan;
@@ -330,14 +328,14 @@ public:
     }
     void setEstado(bool s) { estado = s; }
 
-    void mostrar() const {
+    void mostrar() {
         cout << "  Plan    : " << tipo            << "\n";
         cout << "  Precio  : S/. " << fixed << setprecision(2) << precio << "\n";
         cout << "  Inicio  : " << fechaInicio     << "\n";
         cout << "  Estado  : " << (estado ? "Activa" : "Inactiva") << "\n";
     }
 
-    void guardarEnArchivo(const string& emailUsuario) const {
+    void guardarEnArchivo(string emailUsuario) {
         ofstream f("suscripciones.txt", ios::app);
         if (f.is_open()) {
             f << idSuscripcion << "|" << tipo << "|"
@@ -370,11 +368,11 @@ public:
     Suscripcion* getSuscripcion()          const { return suscripcionActiva; }
     Lista<Perfil*>* getPerfiles()                { return perfiles; }
 
-    bool validarAcceso(const string& em, const string& pass) const {
+    bool validarAcceso(string em, string pass) {
         return (email == em && password == pass);
     }
 
-    void guardarEnArchivo() const {
+    void guardarEnArchivo() {
         ofstream f("usuarios.txt", ios::app);
         if (f.is_open()) {
             f << email << "|" << password << "\n";
@@ -382,7 +380,7 @@ public:
         }
     }
 
-    static bool existeUsuario(const string& email) {
+    bool existeUsuario(string email) {
         ifstream f("usuarios.txt");
         string linea;
         while (getline(f, linea)) {
@@ -392,7 +390,7 @@ public:
         return false;
     }
 
-    static bool validarCredenciales(const string& email, const string& pass) {
+    bool validarCredenciales(string email, string pass) {
         ifstream f("usuarios.txt");
         string linea;
         while (getline(f, linea)) {
@@ -415,22 +413,22 @@ private:
 class MetodoPago
 {
 public:
-    MetodoPago(int id, const string& tipo,
-               const string& numero, const string& titular)
+    MetodoPago(int id, string tipo,
+               string numero, string titular)
         : id(id), tipo(tipo), numero(numero), titular(titular) {}
     ~MetodoPago() {}
 
     int    getId()      const { return id; }
     string getTipo()    const { return tipo; }
     string getNumero()  const { return numero; }
-    string getTitular() const { return titular; }
+    string getTitular() { return titular; }
 
-    void mostrar() const {
+    void mostrar() {
         cout << "  [" << id << "] " << tipo << "  |  "
              << numero << "  |  " << titular << "\n";
     }
 
-    void guardarEnArchivo(const string& emailUsuario) const {
+    void guardarEnArchivo(string emailUsuario) {
         ofstream f("metodos_pago.txt", ios::app);
         if (f.is_open()) {
             f << id << "|" << tipo << "|" << numero << "|"
@@ -455,16 +453,16 @@ public:
     ~Factura() {}
 
     string getIdFactura()  const { return idFactura; }
-    float  getMontoTotal() const { return montoTotal; }
+    float  getMontoTotal() { return montoTotal; }
 
-    void mostrar() const {
+    void mostrar() {
         cout << "  " << idFactura << "  |  "
              << fechaEmision << "  |  S/. "
              << fixed << setprecision(2) << montoTotal
              << "  |  " << metodoPago << "\n";
     }
 
-    void guardarEnArchivo() const {
+    void guardarEnArchivo() {
         ofstream f("facturas.txt", ios::app);
         if (f.is_open()) {
             f << idFactura << "|" << fechaEmision << "|"
@@ -494,9 +492,9 @@ public:
     ~Pelicula() {}
 
     string getDirector()   const { return director; }
-    string getProductora() const { return productora; }
+    string getProductora() { return productora; }
 
-    void mostrarDetalle() const override {
+    void mostrarDetalle() {
         Contenido::mostrarDetalle();
         cout << "  Director     : " << director   << "\n";
         cout << "  Productora   : " << productora << "\n";
@@ -504,14 +502,14 @@ public:
         cout << "  Pais origen  : " << paisOrigen << "\n";
     }
 
-    void mostrarResumen() const {
+    void mostrarResumen() {
         cout << "  [" << id << "] " << titulo
              << " | " << genero
              << " | " << anio
              << " | Dir: " << director << "\n";
     }
 
-    void guardarEnArchivo() const {
+    void guardarEnArchivo() {
         ofstream f("peliculas.txt", ios::app);
         if (f.is_open()) {
             f << id << "|" << titulo << "|" << genero << "|"
@@ -539,10 +537,10 @@ public:
     ~Recomendacion() {}
 
     string generarMotivo()        const { return motivo; }
-    float  calcularCoincidencia() const { return puntajeCoincidencia; }
+    float  calcularCoincidencia() { return puntajeCoincidencia; }
     bool   esRelevante()          const { return puntajeCoincidencia >= 70; }
 
-    void mostrarRecomendacion() const {
+    void mostrarRecomendacion() {
         cout << "  Recomendado : " << contenido->getTitulo()   << "\n";
         cout << "  Motivo      : " << motivo                   << "\n";
         cout << "  Coincidencia: " << puntajeCoincidencia      << "%\n";

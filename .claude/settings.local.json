@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\carlo\\\\OneDrive\\\\Imágenes\\\\Documentos\\\\Netflix--Alg-estructura-datos\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\carlo\\\\OneDrive\\\\Imágenes\\\\Documentos\\\\Netflix--Alg-estructura-datos\" -Recurse -File | Where-Object {$_.Extension -in @\\('.h', '.cpp', '.c'\\)} | Select-Object -ExpandProperty FullName)"
+    ]
+  }
+}
