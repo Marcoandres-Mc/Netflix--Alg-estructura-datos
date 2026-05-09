@@ -85,47 +85,47 @@ private:
     Pila<string>*       historialBusquedas;
     Cola<Contenido*>*   colaReproduccion;
 
-    void setColor(ConsoleColor c) const { Console::ForegroundColor = c; }
-    void resetColor() const { Console::ForegroundColor = ConsoleColor::White; }
+    void setColor(ConsoleColor c) { Console::ForegroundColor = c; }
+    void resetColor() { Console::ForegroundColor = ConsoleColor::White; }
 
-    void menuOp(const string& key, const string& desc) const {
+    void menuOp(string key, string desc) {
         cout << "  ";
         setColor(ConsoleColor::Yellow);
         cout << key;
         resetColor();
         cout << ". " << desc << "\n";
     }
-    void promptOpcion() const {
+    void promptOpcion() {
         setColor(ConsoleColor::Green);
         cout << "  Opcion: ";
         resetColor();
     }
-    void msgOk(const string& msg) const {
+    void msgOk(string msg) {
         setColor(ConsoleColor::Green);
         cout << msg;
         resetColor();
     }
-    void msgErr(const string& msg) const {
+    void msgErr(string msg) {
         setColor(ConsoleColor::DarkRed);
         cout << msg;
         resetColor();
     }
     
-    bool esNumero(const string& s) const {
+    bool esNumero(string s) {
         if (s.empty()) return false;
         for (char c : s)
             if (c < '0' || c > '9') return false;
         return true;
     }
 
-    void linea(char c = '=', int n = 52) const {
+    void linea(char c = '=', int n = 52) {
         setColor(c == '=' ? ConsoleColor::Red : ConsoleColor::DarkGray);
         for (int i = 0; i < n; i++) cout << c;
         cout << "\n";
         resetColor();
     }
 
-    void titulo(const string& t) const {
+    void titulo(string t) {
         linea('=');
         setColor(ConsoleColor::Yellow);
         int pad = (52 - (int)t.size()) / 2;
@@ -134,7 +134,7 @@ private:
         resetColor();
     }
 
-    void pausa() const {
+    void pausa() {
         setColor(ConsoleColor::DarkCyan);
         cout << "\n  Presiona Enter para continuar...";
         resetColor();
@@ -146,92 +146,95 @@ private:
         while (num.size() < 3) num = "0" + num;
         return "F" + num;
     }
-    string fechaHoy() const { return "2026-05-08"; }
+    string fechaHoy() { return "2026-05-08"; }
+
+    Categoria* buscarCategoriaPorGenero(string genero) {
+        Nodo<Categoria*>* nodo = categorias->getCabeza();
+        while (nodo) {
+            if (nodo->dato->getNombre() == genero) return nodo->dato;
+            nodo = nodo->next;
+        }
+        return nullptr;
+    }
 
     void cargarCatalogo() {
-        categorias->insertarFinal(new Categoria(1, "Accion",       "Peliculas y series de accion"));
-        categorias->insertarFinal(new Categoria(2, "Drama",        "Historias dramaticas"));
-        categorias->insertarFinal(new Categoria(3, "Sci-Fi",       "Ciencia ficcion"));
-        categorias->insertarFinal(new Categoria(4, "Terror",       "Horror y suspenso"));
-        categorias->insertarFinal(new Categoria(5, "Comedia",      "Humor y entretenimiento"));
-        categorias->insertarFinal(new Categoria(6, "Documental",   "Contenido educativo"));
-        categorias->insertarFinal(new Categoria(7, "Thriller",     "Suspenso y tension"));
+        categorias->insertarFinal(new Categoria(1, "Accion",     "Peliculas y series de accion"));
+        categorias->insertarFinal(new Categoria(2, "Drama",      "Historias dramaticas"));
+        categorias->insertarFinal(new Categoria(3, "Sci-Fi",     "Ciencia ficcion"));
+        categorias->insertarFinal(new Categoria(4, "Terror",     "Horror y suspenso"));
+        categorias->insertarFinal(new Categoria(5, "Comedia",    "Humor y entretenimiento"));
+        categorias->insertarFinal(new Categoria(6, "Documental", "Contenido educativo"));
+        categorias->insertarFinal(new Categoria(7, "Thriller",   "Suspenso y tension"));
 
-        Categoria* sci  = categorias->obtenerElemento(2);
-        Categoria* dra  = categorias->obtenerElemento(1);
-        Categoria* thr  = categorias->obtenerElemento(6);
-        Categoria* acc  = categorias->obtenerElemento(0);
-        Categoria* com  = categorias->obtenerElemento(4);
+        cargarSeries();
+        cargarPeliculas();
+    }
 
-        Serie* s1 = new Serie(1, "Stranger Things", "Sci-Fi",
-            "Un grupo de ninos enfrenta fuerzas sobrenaturales en Hawkins.", "+13", sci);
-        s1->agregarTemporada(new Temporada(1, 2016));
-        s1->agregarTemporada(new Temporada(2, 2017));
-        s1->agregarTemporada(new Temporada(3, 2019));
-        s1->agregarCalificacion(new Calificacion(5, "Obra maestra", "user1"));
-        s1->agregarCalificacion(new Calificacion(4, "Muy buena",    "user2"));
-        catalogoSeries->insertarFinal(s1);
+    void cargarSeries() {
+        ifstream f("series.txt");
+        if (!f.is_open()) { cout << "  [Aviso] No se encontro series.txt\n"; return; }
+        string linea;
+        while (getline(f, linea)) {
+            if (linea.empty()) continue;
+            istringstream ss(linea);
+            string sid, titulo, genero, descripcion, clasificacion;
+            if (!getline(ss, sid,          '|')) continue;
+            if (!getline(ss, titulo,       '|')) continue;
+            if (!getline(ss, genero,       '|')) continue;
+            if (!getline(ss, descripcion,  '|')) continue;
+            if (!getline(ss, clasificacion,'|')) continue;
+            Categoria* cat = buscarCategoriaPorGenero(genero);
+            catalogoSeries->insertarFinal(
+                new Serie(stoi(sid), titulo, genero, descripcion, clasificacion, cat));
+        }
+        f.close();
 
-        Serie* s2 = new Serie(2, "Breaking Bad", "Drama",
-            "Un profesor de quimica se convierte en fabricante de drogas.", "+16", dra);
-        s2->agregarTemporada(new Temporada(1, 2008));
-        s2->agregarTemporada(new Temporada(2, 2009));
-        s2->agregarTemporada(new Temporada(3, 2010));
-        s2->agregarTemporada(new Temporada(4, 2011));
-        s2->agregarTemporada(new Temporada(5, 2012));
-        s2->agregarCalificacion(new Calificacion(5, "La mejor serie", "user3"));
-        catalogoSeries->insertarFinal(s2);
+        ifstream ft("temporadas.txt");
+        if (!ft.is_open()) return;
+        while (getline(ft, linea)) {
+            if (linea.empty()) continue;
+            istringstream ss(linea);
+            string sid, snum, sanio;
+            if (!getline(ss, sid,  '|')) continue;
+            if (!getline(ss, snum, '|')) continue;
+            if (!getline(ss, sanio,'|')) continue;
+            int id = stoi(sid);
+            Nodo<Serie*>* nodo = catalogoSeries->getCabeza();
+            while (nodo) {
+                if (nodo->dato->getId() == id) {
+                    nodo->dato->agregarTemporada(new Temporada(stoi(snum), stoi(sanio)));
+                    break;
+                }
+                nodo = nodo->next;
+            }
+        }
+        ft.close();
+    }
 
-        Serie* s3 = new Serie(3, "Dark", "Sci-Fi",
-            "Viajes en el tiempo y conspiraciones en un pueblo aleman.", "+14", sci);
-        s3->agregarTemporada(new Temporada(1, 2017));
-        s3->agregarTemporada(new Temporada(2, 2019));
-        s3->agregarTemporada(new Temporada(3, 2020));
-        s3->agregarCalificacion(new Calificacion(5, "Increible",    "user4"));
-        s3->agregarCalificacion(new Calificacion(5, "Unica",        "user5"));
-        catalogoSeries->insertarFinal(s3);
-
-        Serie* s4 = new Serie(4, "Squid Game", "Thriller",
-            "Personas endeudadas compiten en juegos mortales por dinero.", "+16", thr);
-        s4->agregarTemporada(new Temporada(1, 2021));
-        s4->agregarTemporada(new Temporada(2, 2024));
-        s4->agregarCalificacion(new Calificacion(4, "Muy intensa", "user6"));
-        catalogoSeries->insertarFinal(s4);
-
-        Serie* s5 = new Serie(5, "The Crown", "Drama",
-            "La historia de la familia real britanica.", "+7", dra);
-        s5->agregarTemporada(new Temporada(1, 2016));
-        s5->agregarTemporada(new Temporada(2, 2017));
-        s5->agregarCalificacion(new Calificacion(3, "Interesante", "user7"));
-        catalogoSeries->insertarFinal(s5);
-
-        Serie* s6 = new Serie(6, "Money Heist", "Thriller",
-            "Un genial ladron planea el robo perfecto a la Casa de la Moneda.", "+14", thr);
-        s6->agregarTemporada(new Temporada(1, 2017));
-        s6->agregarTemporada(new Temporada(2, 2018));
-        s6->agregarTemporada(new Temporada(3, 2019));
-        s6->agregarCalificacion(new Calificacion(5, "Adictiva", "user8"));
-        s6->agregarCalificacion(new Calificacion(4, "Buenisima", "user9"));
-        catalogoSeries->insertarFinal(s6);
-
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            101, "Inception", "Sci-Fi", 2010, 148, "+13", sci,
-            "Christopher Nolan", "Warner Bros", "Ingles", "EE.UU."));
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            102, "Interstellar", "Sci-Fi", 2014, 169, "+7", sci,
-            "Christopher Nolan", "Paramount", "Ingles", "EE.UU."));
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            103, "The Godfather", "Drama", 1972, 175, "+16", dra,
-            "Francis Ford Coppola", "Paramount", "Ingles", "EE.UU."));
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            104, "Parasite", "Thriller", 2019, 132, "+14", thr,
-            "Bong Joon-ho", "CJ Entertainment", "Coreano", "Corea del Sur"));
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            105, "Mad Max: Fury Road", "Accion", 2015, 120, "+14", acc,
-            "George Miller", "Warner Bros", "Ingles", "Australia"));
-        catalogoPeliculas->insertarFinal(new Pelicula(
-            106, "The Grand Budapest Hotel", "Comedia", 2014, 99, "ATP", com,
-            "Wes Anderson", "Fox Searchlight", "Ingles", "EE.UU."));
+    void cargarPeliculas() {
+        ifstream f("peliculas.txt");
+        if (!f.is_open()) { cout << "  [Aviso] No se encontro peliculas.txt\n"; return; }
+        string linea;
+        while (getline(f, linea)) {
+            if (linea.empty()) continue;
+            istringstream ss(linea);
+            string sid, titulo, genero, sanio, sdur, clasif, director, productora, idioma, pais;
+            if (!getline(ss, sid,       '|')) continue;
+            if (!getline(ss, titulo,    '|')) continue;
+            if (!getline(ss, genero,    '|')) continue;
+            if (!getline(ss, sanio,     '|')) continue;
+            if (!getline(ss, sdur,      '|')) continue;
+            if (!getline(ss, clasif,    '|')) continue;
+            if (!getline(ss, director,  '|')) continue;
+            if (!getline(ss, productora,'|')) continue;
+            if (!getline(ss, idioma,    '|')) continue;
+            if (!getline(ss, pais             )) continue;
+            Categoria* cat = buscarCategoriaPorGenero(genero);
+            catalogoPeliculas->insertarFinal(new Pelicula(
+                stoi(sid), titulo, genero, stoi(sanio), stoi(sdur),
+                clasif, cat, director, productora, idioma, pais));
+        }
+        f.close();
     }
 
     void cargarMetodosPago() {
@@ -287,7 +290,7 @@ private:
     }
 
     // ── Pantalla de bienvenida con logo ASCII ─────────────────────
-    void mostrarBienvenida() const {
+    void mostrarBienvenida() {
         Console::Clear();
         setColor(ConsoleColor::Red);
         cout << "\n";
@@ -306,7 +309,7 @@ private:
         linea('-');
     }
 
-    void mostrarMenuPrincipal() const {
+    void mostrarMenuPrincipal() {
         linea('-');
         setColor(ConsoleColor::Yellow);
         cout << "  MENU PRINCIPAL\n";
@@ -322,13 +325,33 @@ private:
     void flujoRegistro() {
         titulo("        REGISTRO DE USUARIO       ");
         string nombre, email, password;
-        setColor(ConsoleColor::Cyan);
-        cout << "  Nombre       : "; getline(cin, nombre);
-        cout << "  Email        : "; getline(cin, email);
-        cout << "  Contrasena   : "; getline(cin, password);
-        resetColor();
 
-        if (Usuario::existeUsuario(email)) {
+        do {
+            setColor(ConsoleColor::Cyan);
+            cout << "  Nombre       : ";
+            resetColor();
+            getline(cin, nombre);
+            if (nombre.empty()) msgErr("  El nombre no puede estar vacio.\n");
+        } while (nombre.empty());
+
+        do {
+            setColor(ConsoleColor::Cyan);
+            cout << "  Email        : ";
+            resetColor();
+            getline(cin, email);
+            if (email.empty()) msgErr("  El email no puede estar vacio.\n");
+        } while (email.empty());
+
+        do {
+            setColor(ConsoleColor::Cyan);
+            cout << "  Contrasena   : ";
+            resetColor();
+            getline(cin, password);
+            if (password.empty()) msgErr("  La contrasena no puede estar vacia.\n");
+        } while (password.empty());
+
+        Usuario tmpCheck(email, "");
+        if (tmpCheck.existeUsuario(email)) {
             msgErr("\n  El email ya esta registrado. Usa otro.\n");
             pausa(); return;
         }
@@ -378,7 +401,8 @@ private:
         cout << "  Contrasena : "; getline(cin, password);
         resetColor();
 
-        if (!Usuario::validarCredenciales(email, password)) {
+        Usuario tmpLogin(email, password);
+        if (!tmpLogin.validarCredenciales(email, password)) {
             msgErr("\n  Credenciales incorrectas.\n");
             pausa(); return;
         }
@@ -589,6 +613,22 @@ private:
         pausa();
     }
 
+    void ordenarPeliculasPorAnio() {
+        int n = catalogoPeliculas->tamanio();
+        for (int i = 1; i < n; i++) {
+            Pelicula* clave = catalogoPeliculas->obtenerElemento(i);
+            int j = i - 1;
+            while (j >= 0 &&
+                   catalogoPeliculas->obtenerElemento(j)->getAnio() > clave->getAnio()) {
+                catalogoPeliculas->reemplazar(j + 1, catalogoPeliculas->obtenerElemento(j));
+                j--;
+            }
+            catalogoPeliculas->reemplazar(j + 1, clave);
+        }
+        msgOk("  Peliculas ordenadas por anio (insercion).\n");
+        pausa();
+    }
+
     void menuPeliculas() {
         do {
             titulo("        PELICULAS              ");
@@ -604,6 +644,7 @@ private:
             linea('-');
             menuOp("1-" + to_string(catalogoPeliculas->tamanio()), "Ver detalle");
             menuOp("F", "Filtrar por genero");
+            menuOp("O", "Ordenar por anio");
             menuOp("0", "Volver");
             linea('-');
             promptOpcion();
@@ -611,6 +652,7 @@ private:
 
             if (entrada == "0") break;
             if (entrada == "F" || entrada == "f") filtrarPeliculasPorGenero();
+            else if (entrada == "O" || entrada == "o") ordenarPeliculasPorAnio();
             else if (esNumero(entrada)) {
                 int sel = stoi(entrada) - 1;
                 if (sel >= 0 && sel < catalogoPeliculas->tamanio())
@@ -656,25 +698,49 @@ private:
     }
 
     void agregarACola(Contenido* c) {
-        msgOk("  '" + c->getTitulo() + "' agregado a la cola de reproduccion.\n");
-        colaReproduccion->encolar(c);
+        if (colaReproduccion->contiene(c)) {
+            setColor(ConsoleColor::DarkYellow);
+            cout << "  '" << c->getTitulo() << "' ya esta en la cola de reproduccion.\n";
+            resetColor();
+        } else {
+            colaReproduccion->encolar(c);
+            msgOk("  '" + c->getTitulo() + "' agregado a la cola de reproduccion.\n");
+        }
         pausa();
     }
 
     void mostrarHistorial() {
-        titulo("  HISTORIAL DE BUSQUEDAS       ");
-        if (historialBusquedas->estaVacia()) {
-            msgErr("  No hay busquedas recientes.\n");
-            pausa(); return;
-        }
-        int i = 1;
-        Nodo<string>* nodo = historialBusquedas->getTope();
-        auto mostrarEntrada = [&](const string& s) {
-            setColor(ConsoleColor::Cyan); cout << "  " << i++ << ". "; resetColor();
-            cout << s << "\n";
-        };
-        while (nodo) { mostrarEntrada(nodo->dato); nodo = nodo->next; }
-        pausa();
+        int op;
+        do {
+            titulo("  HISTORIAL DE BUSQUEDAS       ");
+            if (historialBusquedas->estaVacia()) {
+                msgErr("  No hay busquedas recientes.\n");
+                pausa(); return;
+            }
+            int i = 1;
+            Nodo<string>* nodo = historialBusquedas->getTope();
+            auto mostrarEntrada = [&](string s) {
+                setColor(ConsoleColor::Cyan); cout << "  " << i++ << ". "; resetColor();
+                cout << s << "\n";
+            };
+            while (nodo) { mostrarEntrada(nodo->dato); nodo = nodo->next; }
+            if (historialBusquedas->contieneDuplicados()) {
+                setColor(ConsoleColor::DarkYellow);
+                cout << "  (hay busquedas repetidas en el historial)\n";
+                resetColor();
+            }
+            linea('-');
+            menuOp("1", "Limpiar historial");
+            menuOp("0", "Volver");
+            linea('-');
+            promptOpcion();
+            cin >> op; cin.ignore();
+            if (op == 1) {
+                historialBusquedas->vaciar();
+                msgOk("  Historial limpiado.\n");
+                pausa(); return;
+            }
+        } while (op != 0);
     }
 
     void menuCola() {
@@ -697,6 +763,8 @@ private:
             }
             linea('-');
             menuOp("1", "Reproducir siguiente");
+            menuOp("2", "Quitar de la cola (por posicion)");
+            menuOp("3", "Vaciar cola");
             menuOp("0", "Volver");
             linea('-');
             promptOpcion();
@@ -713,6 +781,24 @@ private:
                     msgErr("  No hay contenido en la cola.\n");
                     pausa();
                 }
+            } else if (op == 2) {
+                if (!colaReproduccion->estaVacia()) {
+                    setColor(ConsoleColor::Cyan); cout << "  Numero a quitar (1-" << colaReproduccion->tamanio() << "): "; resetColor();
+                    int pos; cin >> pos; cin.ignore();
+                    if (pos >= 1 && pos <= colaReproduccion->tamanio()) {
+                        colaReproduccion->eliminarEn(pos - 1);
+                        msgOk("  Elemento eliminado de la cola.\n");
+                    } else {
+                        msgErr("  Posicion invalida.\n");
+                    }
+                    pausa();
+                } else {
+                    msgErr("  La cola esta vacia.\n"); pausa();
+                }
+            } else if (op == 3) {
+                colaReproduccion->vaciar();
+                msgOk("  Cola vaciada.\n");
+                pausa();
             }
         } while (op != 0);
     }
@@ -729,13 +815,13 @@ private:
         pausa();
     }
 
-    Serie* buscarSerie(Nodo<Serie*>* nodo, const string& titulo) {
+    Serie* buscarSerie(Nodo<Serie*>* nodo, string titulo) {
         if (nodo == nullptr) return nullptr;
         if (nodo->dato->getTitulo() == titulo) return nodo->dato;
         return buscarSerie(nodo->next, titulo);
     }
 
-    Pelicula* buscarPelicula(Nodo<Pelicula*>* nodo, const string& titulo) {
+    Pelicula* buscarPelicula(Nodo<Pelicula*>* nodo, string titulo) {
         if (nodo == nullptr) return nullptr;
         if (nodo->dato->getTitulo() == titulo) return nodo->dato;
         return buscarPelicula(nodo->next, titulo);
@@ -750,6 +836,11 @@ private:
 
         if (t == "H" || t == "h") { mostrarHistorial(); return; }
 
+        if (historialBusquedas->buscar(t)) {
+            setColor(ConsoleColor::DarkYellow);
+            cout << "  (ya buscaste '" << t << "' antes)\n";
+            resetColor();
+        }
         historialBusquedas->push(t);
 
         Serie* s = buscarSerie(catalogoSeries->getCabeza(), t);
@@ -789,7 +880,7 @@ private:
             titulo("      MI LISTA DE FAVORITOS    ");
             lista->mostrar();
             linea('-');
-            menuOp("1", "Ordenar alfabeticamente (intercambio)");
+            menuOp("1", "Ordenar alfabeticamente (Shell sort)");
             menuOp("2", "Filtrar por genero (lambda)");
             menuOp("3", "Buscar titulo en mi lista (recursivo)");
             menuOp("4", "Guardar mi lista");
