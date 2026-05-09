@@ -488,13 +488,13 @@ private:
             titulo("         SERIES               ");
             int idx = 1;
             Nodo<Serie*>* nodo = catalogoSeries->getCabeza();
-            while (nodo) {
+            auto mostrarSerie = [&](Serie* s) {
                 setColor(ConsoleColor::Cyan);
                 cout << "  " << idx++ << ". ";
                 resetColor();
-                nodo->dato->mostrarResumen();
-                nodo = nodo->next;
-            }
+                s->mostrarResumen();
+            };
+            while (nodo) { mostrarSerie(nodo->dato); nodo = nodo->next; }
             linea('-');
             menuOp("1-" + to_string(catalogoSeries->tamanio()), "Ver detalle");
             menuOp("F", "Filtrar por genero");
@@ -594,13 +594,13 @@ private:
             titulo("        PELICULAS              ");
             Nodo<Pelicula*>* nodo = catalogoPeliculas->getCabeza();
             int idx = 1;
-            while (nodo) {
+            auto mostrarPelicula = [&](Pelicula* p) {
                 setColor(ConsoleColor::Cyan);
                 cout << "  " << idx++ << ". ";
                 resetColor();
-                nodo->dato->mostrarResumen();
-                nodo = nodo->next;
-            }
+                p->mostrarResumen();
+            };
+            while (nodo) { mostrarPelicula(nodo->dato); nodo = nodo->next; }
             linea('-');
             menuOp("1-" + to_string(catalogoPeliculas->tamanio()), "Ver detalle");
             menuOp("F", "Filtrar por genero");
@@ -669,11 +669,11 @@ private:
         }
         int i = 1;
         Nodo<string>* nodo = historialBusquedas->getTope();
-        while (nodo) {
+        auto mostrarEntrada = [&](const string& s) {
             setColor(ConsoleColor::Cyan); cout << "  " << i++ << ". "; resetColor();
-            cout << nodo->dato << "\n";
-            nodo = nodo->next;
-        }
+            cout << s << "\n";
+        };
+        while (nodo) { mostrarEntrada(nodo->dato); nodo = nodo->next; }
         pausa();
     }
 
@@ -689,11 +689,11 @@ private:
                 linea('-');
                 int i = 1;
                 Nodo<Contenido*>* nodo = colaReproduccion->getFrente();
-                while (nodo) {
+                auto mostrarEnCola = [&](Contenido* c) {
                     setColor(ConsoleColor::Yellow); cout << "  " << i++ << ". "; resetColor();
-                    cout << nodo->dato->getTitulo() << "\n";
-                    nodo = nodo->next;
-                }
+                    cout << c->getTitulo() << "\n";
+                };
+                while (nodo) { mostrarEnCola(nodo->dato); nodo = nodo->next; }
             }
             linea('-');
             menuOp("1", "Reproducir siguiente");
