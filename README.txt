@@ -13,8 +13,9 @@ DETALLE DE DESARROLLO POR INTEGRANTE Y AUTOVALORACIÓN
    Aporte y participación:
    - Creó la estructura inicial del proyecto en Visual Studio (proyecto consola Netflix).
    - Configuró el repositorio de GitHub, .gitignore y la carpeta de assets.
+   - Realizo el diagrama de clases
    - Agregó nuevas clases a las entidades del sistema (feat: agregar nuevas clases).
-   - Implementación de entidades base: Categoria, Contenido, Episodio, Calificacion, Temporada, Serie
+   - Implementación de entidades base: Categoria, Contenido, Calificacion, Serie
    - Realizó revision, refactorizaciones y reorganización del proyecto.
    - Coordinó la integración de los aportes del equipo mediante merges y pull requests.
 
