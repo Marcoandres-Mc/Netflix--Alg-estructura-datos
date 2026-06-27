@@ -23,6 +23,8 @@ public:
         facturas           = new Lista<Factura*>();
         historialBusquedas = new Pila<string>();
         colaReproduccion   = new Cola<Contenido*>();
+        indiceSeries       = new TablaHash<Serie*>(17);
+        indicePeliculas    = new TablaHash<Pelicula*>(17);
     }
 
     ~Sistema() {
@@ -44,6 +46,8 @@ public:
         delete facturas;
         delete historialBusquedas;
         delete colaReproduccion;
+        delete indiceSeries;
+        delete indicePeliculas;
         if (usuarioActual) delete usuarioActual;
     }
 
@@ -82,8 +86,10 @@ private:
     Lista<Factura*>*    facturas;
     int contadorFactura;
     int contadorMetodo;
-    Pila<string>*       historialBusquedas;
-    Cola<Contenido*>*   colaReproduccion;
+    Pila<string>*         historialBusquedas;
+    Cola<Contenido*>*     colaReproduccion;
+    TablaHash<Serie*>*    indiceSeries;
+    TablaHash<Pelicula*>* indicePeliculas;
 
     void setColor(ConsoleColor c) { Console::ForegroundColor = c; }
     void resetColor() { Console::ForegroundColor = ConsoleColor::White; }
@@ -184,8 +190,9 @@ private:
             if (!getline(ss, descripcion,  '|')) continue;
             if (!getline(ss, clasificacion,'|')) continue;
             Categoria* cat = buscarCategoriaPorGenero(genero);
-            catalogoSeries->insertarFinal(
-                new Serie(stoi(sid), titulo, genero, descripcion, clasificacion, cat));
+            Serie* nueva = new Serie(stoi(sid), titulo, genero, descripcion, clasificacion, cat);
+            catalogoSeries->insertarFinal(nueva);
+            indiceSeries->insertar(titulo, nueva);
         }
         f.close();
 
@@ -230,9 +237,11 @@ private:
             if (!getline(ss, idioma,    '|')) continue;
             if (!getline(ss, pais             )) continue;
             Categoria* cat = buscarCategoriaPorGenero(genero);
-            catalogoPeliculas->insertarFinal(new Pelicula(
+            Pelicula* nueva = new Pelicula(
                 stoi(sid), titulo, genero, stoi(sanio), stoi(sdur),
-                clasif, cat, director, productora, idioma, pais));
+                clasif, cat, director, productora, idioma, pais);
+            catalogoPeliculas->insertarFinal(nueva);
+            indicePeliculas->insertar(titulo, nueva);
         }
         f.close();
     }
@@ -843,7 +852,7 @@ private:
         }
         historialBusquedas->push(t);
 
-        Serie* s = buscarSerie(catalogoSeries->getCabeza(), t);
+        Serie* s = indiceSeries->buscar(t);
         if (s) {
             msgOk("\n  Serie encontrada:\n");
             s->mostrarDetalle();
@@ -856,7 +865,7 @@ private:
             return;
         }
 
-        Pelicula* p = buscarPelicula(catalogoPeliculas->getCabeza(), t);
+        Pelicula* p = indicePeliculas->buscar(t);
         if (p) {
             msgOk("\n  Pelicula encontrada:\n");
             p->mostrarDetalle();
