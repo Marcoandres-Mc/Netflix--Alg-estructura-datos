@@ -246,3 +246,116 @@ private:
     Nodo<T>* final_;
     int _tamanio;
 };
+
+
+// ─────────────────────────────────────────────────────
+//  Nodo par clave-valor para colisiones en tabla hash
+// ─────────────────────────────────────────────────────
+template<class K, class V>
+struct NodoPar {
+    K clave;
+    V valor;
+    NodoPar<K, V>* siguiente;
+    NodoPar(const K& c, const V& v) : clave(c), valor(v), siguiente(nullptr) {}
+};
+
+// Lista enlazada de pares (encadenamiento separado)
+template<class K, class V>
+struct ListaHash {
+    NodoPar<K, V>* cabeza;
+
+    ListaHash() : cabeza(nullptr) {}
+
+    // Inserta o actualiza si la clave ya existe
+    void insertar(const K& clave, const V& valor) {
+        NodoPar<K, V>* actual = cabeza;
+        while (actual) {
+            if (actual->clave == clave) { actual->valor = valor; return; }
+            actual = actual->siguiente;
+        }
+        NodoPar<K, V>* nuevo = new NodoPar<K, V>(clave, valor);
+        nuevo->siguiente = cabeza;
+        cabeza = nuevo;
+    }
+
+    // Devuelve V() (nullptr para punteros) si no encuentra la clave
+    V buscar(const K& clave) const {
+        NodoPar<K, V>* actual = cabeza;
+        while (actual) {
+            if (actual->clave == clave) return actual->valor;
+            actual = actual->siguiente;
+        }
+        return V();
+    }
+
+    bool eliminar(const K& clave) {
+        if (!cabeza) return false;
+        if (cabeza->clave == clave) {
+            NodoPar<K, V>* temp = cabeza;
+            cabeza = cabeza->siguiente;
+            delete temp;
+            return true;
+        }
+        NodoPar<K, V>* ant = cabeza;
+        while (ant->siguiente) {
+            if (ant->siguiente->clave == clave) {
+                NodoPar<K, V>* temp = ant->siguiente;
+                ant->siguiente = temp->siguiente;
+                delete temp;
+                return true;
+            }
+            ant = ant->siguiente;
+        }
+        return false;
+    }
+
+    void limpiar() {
+        while (cabeza) {
+            NodoPar<K, V>* temp = cabeza;
+            cabeza = cabeza->siguiente;
+            delete temp;
+        }
+    }
+};
+
+// ─────────────────────────────────────────────────────
+//  Tabla Hash con encadenamiento separado
+//  Clave: string  |  Valor: V (cualquier tipo)
+//  Hash polinomial rolling con base 31
+// ─────────────────────────────────────────────────────
+template<class V>
+class TablaHash {
+    int tam;
+    ListaHash<string, V>* tabla;
+
+    int calcularHash(const string& clave) const {
+        unsigned long h = 0;
+        for (char c : clave) h = h * 31 + c;
+        return (int)(h % (unsigned long)tam);
+    }
+
+public:
+    explicit TablaHash(int tam = 17) : tam(tam) {
+        tabla = new ListaHash<string, V>[tam];
+    }
+
+    ~TablaHash() {
+        for (int i = 0; i < tam; i++) tabla[i].limpiar();
+        delete[] tabla;
+    }
+
+    void insertar(const string& clave, const V& valor) {
+        tabla[calcularHash(clave)].insertar(clave, valor);
+    }
+
+    // Devuelve nullptr si la clave no existe (para tipos puntero)
+    V buscar(const string& clave) const {
+        return tabla[calcularHash(clave)].buscar(clave);
+    }
+
+    bool eliminar(const string& clave) {
+        return tabla[calcularHash(clave)].eliminar(clave);
+    }
+
+    int getTam() const { return tam; }
+};
