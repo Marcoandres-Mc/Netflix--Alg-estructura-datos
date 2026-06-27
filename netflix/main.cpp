@@ -3,6 +3,7 @@
 using namespace std;
 using namespace System;
 int main() {
+    DataSetGenerator :: menuGenerador();
     Sistema sistema;
     sistema.iniciar();
 
