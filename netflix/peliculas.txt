@@ -1,6 +1,0 @@
-101|Inception|Sci-Fi|2010|148|+13|Christopher Nolan|Warner Bros|Ingles|EE.UU.
-102|Interstellar|Sci-Fi|2014|169|+7|Christopher Nolan|Paramount|Ingles|EE.UU.
-103|The Godfather|Drama|1972|175|+16|Francis Ford Coppola|Paramount|Ingles|EE.UU.
-104|Parasite|Thriller|2019|132|+14|Bong Joon-ho|CJ Entertainment|Coreano|Corea del Sur
-105|Mad Max: Fury Road|Accion|2015|120|+14|George Miller|Warner Bros|Ingles|Australia
-106|The Grand Budapest Hotel|Comedia|2014|99|ATP|Wes Anderson|Fox Searchlight|Ingles|EE.UU.

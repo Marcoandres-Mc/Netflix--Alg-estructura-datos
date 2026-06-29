@@ -1,6 +1,0 @@
-1|Stranger Things|Sci-Fi|Un grupo de ninos enfrenta fuerzas sobrenaturales en Hawkins.|+13
-2|Breaking Bad|Drama|Un profesor de quimica se convierte en fabricante de drogas.|+16
-3|Dark|Sci-Fi|Viajes en el tiempo y conspiraciones en un pueblo aleman.|+14
-4|Squid Game|Thriller|Personas endeudadas compiten en juegos mortales por dinero.|+16
-5|The Crown|Drama|La historia de la familia real britanica.|+7
-6|Money Heist|Thriller|Un genial ladron planea el robo perfecto a la Casa de la Moneda.|+14

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include "Estructuras.h"
 #include "Entidades.h"
+#include "DataSetGenerator.h"
 using namespace std;
 using namespace System;
 
@@ -61,7 +62,8 @@ public:
             switch (opcion) {
                 case 1: flujoRegistro();     break;
                 case 2: flujoInicioSesion(); break;
-                case 3:
+                case 3: DatasetGenerator::menuGenerador(); break;
+                case 4:
                     linea('-');
                     setColor(ConsoleColor::Green);
                     cout << "  Hasta luego!\n";
@@ -73,7 +75,7 @@ public:
                     cout << "  Opcion invalida.\n";
                     resetColor();
             }
-        } while (opcion != 3);
+        } while (opcion != 4);
     }
 
 private:
@@ -326,7 +328,8 @@ private:
         linea('-');
         menuOp("1", "Registrarse");
         menuOp("2", "Iniciar sesion");
-        menuOp("3", "Salir");
+        menuOp("3", "Generador de Dataset - peliculas");
+        menuOp("4", "Salir");
         linea('-');
         promptOpcion();
     }
