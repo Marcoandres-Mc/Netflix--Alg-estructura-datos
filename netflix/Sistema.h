@@ -552,6 +552,73 @@ private:
         } while (true);
     }
 
+// ARBOL BINARIO DE BUSQUEDA : Series por id
+ void menuArbolSeries() {
+        int op;
+        do {
+            titulo("   ARBOL DE SERIES POR ID      ");
+            setColor(ConsoleColor::Cyan);
+            cout << "  Series en el arbol: " << arbolIdSeries->tamanio()
+                 << "   |   Altura del arbol: " << arbolIdSeries->altura() << "\n";
+            resetColor();
+            linea('-');
+            menuOp("1", "Buscar serie por id (busqueda ABB)");
+            menuOp("2", "Id minimo / Id maximo");
+            menuOp("3", "Listado ordenado por id (recorrido InOrden)");
+            menuOp("4", "Eliminar serie del arbol por id (4 casos)");
+            menuOp("0", "Volver");
+            linea('-');
+            promptOpcion();
+            cin >> op; cin.ignore();
+            switch (op) {
+                case 1: {
+                    setColor(ConsoleColor::Cyan); cout << "  Id a buscar: "; resetColor();
+                    int id; cin >> id; cin.ignore();
+                    Lista<Serie*> resultado;
+                    if (arbolIdSeries->buscar(id, resultado)) {
+                        msgOk("  Serie encontrada:\n");
+                        resultado.getCabeza()->dato->mostrarDetalle();
+                    } else {
+                        msgErr("  No existe una serie con ese id.\n");
+                    }
+                    pausa(); break;
+                }
+                case 2: {
+                    int mn, mx;
+                    if (arbolIdSeries->minimo(mn) && arbolIdSeries->maximo(mx)) {
+                        msgOk("  Id minimo: "); setColor(ConsoleColor::Green); cout << mn << "\n"; resetColor();
+                        msgOk("  Id maximo: "); setColor(ConsoleColor::Green); cout << mx << "\n"; resetColor();
+                    } else {
+                        msgErr("  El arbol esta vacio.\n");
+                    }
+                    pausa(); break;
+                }
+                case 3: {
+                    if (arbolIdSeries->estaVacio()) {
+                        msgErr("  El arbol esta vacio.\n");
+                    } else {
+                        arbolIdSeries->inOrden([&](NodoBB<int, Serie*>* n) {
+                            setColor(ConsoleColor::Yellow);
+                            cout << "  [" << n->clave << "] "; resetColor();
+                            cout << n->valores.getCabeza()->dato->getTitulo() << "\n";
+                        });
+                    }
+                    pausa(); break;
+                }
+                case 4: {
+                    setColor(ConsoleColor::Cyan); cout << "  Id a eliminar del arbol: "; resetColor();
+                    int id; cin >> id; cin.ignore();
+                    if (arbolIdSeries->eliminar(id))
+                        msgOk("  Nodo eliminado del arbol (la serie sigue en el catalogo).\n");
+                    else
+                        msgErr("  Ese id no existe en el arbol.\n");
+                    pausa(); break;
+                }
+                case 0: break;
+                default: msgErr("  Opcion invalida.\n"); pausa();
+            }
+        } while (op != 0);
+    }
     void detalleSerie(Serie* s) {
         titulo("       DETALLE DE SERIE         ");
         s->mostrarDetalle();
