@@ -359,3 +359,236 @@ public:
 
     int getTam() const { return tam; }
 };
+
+// IMPLEMENTACION DE ARBOL BINARIO
+template<class K, class V>
+struct NodoBB {
+    K clave;
+    Lista<V> valores;
+    NodoBB* izquierda;
+    NodoBB* derecha;
+    NodoBB(K c, V v) : clave(c), izquierda(nullptr), derecha(nullptr) {
+        valores.insertarFinal(v);
+    }
+};
+
+template<class K, class V>
+class ArbolBB {
+public:
+    ArbolBB() : raiz(nullptr), _tamanio(0) {}
+    ~ArbolBB() { destruir(raiz); }
+    void insertar(K clave, V valor) { raiz = insertarRec(raiz, clave, valor); }
+ bool buscar(K clave, Lista<V>& resultado) {
+        NodoBB<K, V>* n = buscarRec(raiz, clave);
+        if (!n) return false;
+        Nodo<V>* actual = n->valores.getCabeza();
+        while (actual) { resultado.insertarFinal(actual->dato); actual = actual->next; }
+        return true;
+    }
+bool contieneClave(K clave) { return buscarRec(raiz, clave) != nullptr; }
+
+    NodoBB<K, V>* buscarNodo(K clave) { return buscarRec(raiz, clave); }
+
+    bool eliminar(K clave) {
+        bool eliminado = false;
+        raiz = eliminarRec(raiz, clave, eliminado);
+        return eliminado;
+    }
+ bool minimo(K& resultado) {
+        if (!raiz) return false;
+        NodoBB<K, V>* n = raiz;
+        while (n->izquierda) n = n->izquierda;
+        resultado = n->clave;
+        return true;
+    }
+
+    bool maximo(K& resultado) {
+        if (!raiz) return false;
+        NodoBB<K, V>* n = raiz;
+        while (n->derecha) n = n->derecha;
+        resultado = n->clave;
+        return true;
+    }
+ bool sucesor(K clave, K& resultado) {
+        NodoBB<K, V>* objetivo = buscarRec(raiz, clave);
+        if (!objetivo) return false;
+
+        if (objetivo->derecha) {
+            NodoBB<K, V>* n = objetivo->derecha;
+            while (n->izquierda) n = n->izquierda;
+            resultado = n->clave;
+            return true;
+        }
+        NodoBB<K, V>* candidato = nullptr;
+        NodoBB<K, V>* actual = raiz;
+        while (actual && !(actual->clave == clave)) {
+            if (clave < actual->clave) { candidato = actual; actual = actual->izquierda; }
+            else                       { actual = actual->derecha; }
+        }
+        if (!candidato) return false;
+        resultado = candidato->clave;
+        return true;
+    }
+
+    bool predecesor(K clave, K& resultado) {
+        NodoBB<K, V>* objetivo = buscarRec(raiz, clave);
+        if (!objetivo) return false;
+
+        if (objetivo->izquierda) {
+            NodoBB<K, V>* n = objetivo->izquierda;
+            while (n->derecha) n = n->derecha;
+            resultado = n->clave;
+            return true;
+        }
+        NodoBB<K, V>* candidato = nullptr;
+        NodoBB<K, V>* actual = raiz;
+        while (actual && !(actual->clave == clave)) {
+            if (clave > actual->clave) { candidato = actual; actual = actual->derecha; }
+            else                       { actual = actual->izquierda; }
+        }
+        if (!candidato) return false;
+        resultado = candidato->clave;
+        return true;
+    }
+ template<class Fn>
+    void inOrden(Fn visitar) { inOrdenRec(raiz, visitar); }
+
+    template<class Fn>
+    void preOrden(Fn visitar) { preOrdenRec(raiz, visitar); }
+
+    template<class Fn>
+    void postOrden(Fn visitar) { postOrdenRec(raiz, visitar); }
+void nodosPorNivel(Lista<int>& conteos) {
+        if (!raiz) return;
+        struct ItemNivel { NodoBB<K, V>* nodo; int nivel; };
+        Cola<ItemNivel> cola;
+        ItemNivel inicio; inicio.nodo = raiz; inicio.nivel = 0;
+        cola.encolar(inicio);
+        while (!cola.estaVacia()) {
+            ItemNivel item = cola.frente();
+            cola.desencolar();
+            while (conteos.tamanio() <= item.nivel) conteos.insertarFinal(0);
+            conteos.reemplazar(item.nivel, conteos.obtenerElemento(item.nivel) + 1);
+            if (item.nodo->izquierda) {
+                ItemNivel izq; izq.nodo = item.nodo->izquierda; izq.nivel = item.nivel + 1;
+                cola.encolar(izq);
+            }
+            if (item.nodo->derecha) {
+                ItemNivel der; der.nodo = item.nodo->derecha; der.nivel = item.nivel + 1;
+                cola.encolar(der);
+            }
+        }
+    }
+
+    int altura() { return alturaRec(raiz); }
+    int tamanio() const { return _tamanio; }
+    bool estaVacio() const { return raiz == nullptr; }
+    NodoBB<K, V>* getRaiz() { return raiz; }
+
+private:
+    NodoBB<K, V>* raiz;
+    int _tamanio;
+
+    NodoBB<K, V>* insertarRec(NodoBB<K, V>* nodo, K clave, V valor) {
+        if (!nodo) { _tamanio++; return new NodoBB<K, V>(clave, valor); }
+        if (clave < nodo->clave)      nodo->izquierda = insertarRec(nodo->izquierda, clave, valor);
+        else if (nodo->clave < clave) nodo->derecha   = insertarRec(nodo->derecha, clave, valor);
+        else                          nodo->valores.insertarFinal(valor); // clave repetida
+        return nodo;
+    }
+
+    NodoBB<K, V>* buscarRec(NodoBB<K, V>* nodo, K clave) {
+        if (!nodo) return nullptr;
+        if (clave == nodo->clave) return nodo;
+        if (clave < nodo->clave)  return buscarRec(nodo->izquierda, clave);
+        return buscarRec(nodo->derecha, clave);
+    }
+
+    NodoBB<K, V>* eliminarRec(NodoBB<K, V>* nodo, K clave, bool& eliminado) {
+        if (!nodo) return nullptr;
+        if (clave < nodo->clave) {
+            nodo->izquierda = eliminarRec(nodo->izquierda, clave, eliminado);
+        } else if (nodo->clave < clave) {
+            nodo->derecha = eliminarRec(nodo->derecha, clave, eliminado);
+        } else {
+            eliminado = true;
+            if (!nodo->izquierda && !nodo->derecha) {
+                // Caso 1: hoja -> se convierte en arbol vacio
+                delete nodo; _tamanio--; return nullptr;
+            } else if (!nodo->izquierda) {
+                // Caso 2: izquierda vacia, derecha no -> sube la derecha
+                NodoBB<K, V>* temp = nodo->derecha;
+                delete nodo; _tamanio--; return temp;
+            } else if (!nodo->derecha) {
+                // Caso 3: derecha vacia, izquierda no -> sube la izquierda
+                NodoBB<K, V>* temp = nodo->izquierda;
+                delete nodo; _tamanio--; return temp;
+                //Caso 4: dos hijos -> se reemplaza por el predecesor
+                //(el nodo mas a la derecha del subarbol izquierdo).
+            } else { NodoBB<K, V>* izqOriginal = nodo->izquierda;
+                NodoBB<K, V>* derOriginal = nodo->derecha;
+
+                NodoBB<K, V>* padrePred = nodo;
+                NodoBB<K, V>* pred = izqOriginal;
+                bool esHijoDirecto = true;
+                while (pred->derecha) {
+                    padrePred = pred;
+                    pred = pred->derecha;
+                    esHijoDirecto = false;
+                }
+
+                if (esHijoDirecto) {                   
+                pred->derecha = derOriginal;
+} else {
+                    padrePred->derecha = pred->izquierda; 
+                    pred->izquierda = izqOriginal;
+                    pred->derecha   = derOriginal;
+                }
+
+                delete nodo;
+                _tamanio--;
+                return pred;
+            }
+        }
+        return nodo;
+    }
+
+    template<class Fn>
+    void inOrdenRec(NodoBB<K, V>* nodo, Fn visitar) {
+        if (!nodo) return;
+        inOrdenRec(nodo->izquierda, visitar);
+        visitar(nodo);
+        inOrdenRec(nodo->derecha, visitar);
+    }
+
+    template<class Fn>
+    void preOrdenRec(NodoBB<K, V>* nodo, Fn visitar) {
+        if (!nodo) return;
+        visitar(nodo);
+        preOrdenRec(nodo->izquierda, visitar);
+        preOrdenRec(nodo->derecha, visitar);
+    }
+
+    template<class Fn>
+    void postOrdenRec(NodoBB<K, V>* nodo, Fn visitar) {
+        if (!nodo) return;
+        postOrdenRec(nodo->izquierda, visitar);
+        postOrdenRec(nodo->derecha, visitar);
+        visitar(nodo);
+    }
+
+    int alturaRec(NodoBB<K, V>* nodo) {
+        if (!nodo) return -1;
+        int hi = alturaRec(nodo->izquierda);
+        int hd = alturaRec(nodo->derecha);
+        return 1 + (hi > hd ? hi : hd);
+    }
+
+    void destruir(NodoBB<K, V>* nodo) {
+        if (!nodo) return;
+        destruir(nodo->izquierda);
+        destruir(nodo->derecha);
+        delete nodo;
+    }
+};
+
